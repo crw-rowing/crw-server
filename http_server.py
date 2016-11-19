@@ -10,11 +10,23 @@ def serve(host, port):
 
 
 class FileServer(BaseHTTPRequestHandler):
+    def resolve_filename(self, fname):
+        """
+        Gives the right filename to be read and sent to the client,
+        based on the request path.
+        """
+        if fname in ('', '/'):
+            return 'static/index.html'
+        if fname[0] == '/':
+            return fname[1:]
+        return fname
+
     def send_file(self, fname, write=True):
         """
         Reads a file and sends as HTTP response, including the MIME type.
         write indicates if the file should actually be sent, or only the headers
         """
+        fname = self.resolve_filename(fname)
         mime = guess_type(fname)[0] or 'text/plain'
         try:
             f = open(fname)
@@ -38,7 +50,7 @@ class FileServer(BaseHTTPRequestHandler):
                 self.wfile.write('IOError ({})'.format(errno.errorcode[e.errno]))
 
     def do_HEAD(self):
-        self.send_file('.' + self.path, write=False)
+        self.send_file(self.path, write=False)
 
     def do_GET(self):
-        self.send_file('.' + self.path)
+        self.send_file(self.path)
