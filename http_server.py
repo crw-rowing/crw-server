@@ -28,26 +28,32 @@ class FileServer(BaseHTTPRequestHandler):
         """
         fname = self.resolve_filename(fname)
         mime = guess_type(fname)[0] or 'text/plain'
-        try:
-            f = open(fname)
-            self.send_response(200) # OK
+        if not fname.startswith('static/'):
+            self.send_response(403) # Forbidden
             self.send_header('Content-type', mime)
             self.end_headers()
-            if write:
-                self.wfile.write(f.read())
-            f.close()
-        except IOError, e:
-            if e.errno == errno.ENOENT:
-                self.send_response(404) # Not Found
+            self.wfile.write('Forbidden')
+        else:
+            try:
+                f = open(fname)
+                self.send_response(200) # OK
                 self.send_header('Content-type', mime)
                 self.end_headers()
-            else:
-                self.send_response(500) # Internal Server Error, idk what else
-                self.send_header('Content-type', mime)
-                self.end_headers()
-            
-            if write:
-                self.wfile.write('IOError ({})'.format(errno.errorcode[e.errno]))
+                if write:
+                    self.wfile.write(f.read())
+                f.close()
+            except IOError, e:
+                if e.errno == errno.ENOENT:
+                    self.send_response(404) # Not Found
+                    self.send_header('Content-type', mime)
+                    self.end_headers()
+                else:
+                    self.send_response(500) # Internal Server Error, idk what else
+                    self.send_header('Content-type', mime)
+                    self.end_headers()
+                
+                if write:
+                    self.wfile.write('IOError ({})'.format(errno.errorcode[e.errno]))
 
     def do_HEAD(self):
         self.send_file(self.path, write=False)
