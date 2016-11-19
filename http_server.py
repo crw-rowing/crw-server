@@ -48,7 +48,7 @@ class FileServer(BaseHTTPRequestHandler):
                     self.send_header('Content-type', mime)
                     self.end_headers()
                 else:
-                    self.send_response(500) # Internal Server Error, idk what else
+                    self.send_response(403) # Forbidden
                     self.send_header('Content-type', mime)
                     self.end_headers()
                 
