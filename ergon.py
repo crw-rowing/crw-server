@@ -1,6 +1,8 @@
 import http_server
 
 
+VERSION = '0.1'
+
 HOST = ''
 PORT = 8000
 

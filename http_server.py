@@ -2,6 +2,7 @@ from BaseHTTPServer import HTTPServer, BaseHTTPRequestHandler
 from mimetypes import guess_type
 from posixpath import normpath
 import errno
+import ergon
 
 
 def serve(host, port):
@@ -15,6 +16,7 @@ class FileServer(BaseHTTPRequestHandler):
         '': 'static/index.html',
         'favicon.ico': 'static/favicon.ico',
     }
+    server_version = "Ergon/{}".format(ergon.VERSION)
 
     def resolve_filename(self, fname):
         """
