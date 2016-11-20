@@ -13,6 +13,7 @@ def serve(host, port):
 class FileServer(BaseHTTPRequestHandler):
     redirects = {
         '': 'static/index.html',
+        'favicon.ico': 'static/favicon.ico',
     }
 
     def resolve_filename(self, fname):
