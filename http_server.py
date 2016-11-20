@@ -1,5 +1,6 @@
 from BaseHTTPServer import HTTPServer, BaseHTTPRequestHandler
 from mimetypes import guess_type
+from posixpath import normpath
 import errno
 
 
@@ -15,6 +16,7 @@ class FileServer(BaseHTTPRequestHandler):
         Gives the right filename to be read and sent to the client,
         based on the request path.
         """
+        fname = normpath(fname)
         if fname in ('', '/'):
             return 'static/index.html'
         if fname[0] == '/':
