@@ -11,17 +11,20 @@ def serve(host, port):
 
 
 class FileServer(BaseHTTPRequestHandler):
+    redirects = {
+        '': 'static/index.html',
+    }
+
     def resolve_filename(self, fname):
         """
         Gives the right filename to be read and sent to the client,
         based on the request path.
         """
         fname = normpath(fname)
-        if fname in ('', '/'):
-            return 'static/index.html'
         if fname[0] == '/':
-            return fname[1:]
-        return fname
+            fname = fname[1:]
+        return FileServer.redirects[fname] if fname in FileServer.redirects \
+            else fname
 
     def send_file(self, fname, write=True):
         """
@@ -34,6 +37,7 @@ class FileServer(BaseHTTPRequestHandler):
             self.send_response(403)  # Forbidden
             self.send_header('Content-type', 'text/html')
             self.end_headers()
+
             if write:
                 self.wfile.write('Forbidden')
         else:
