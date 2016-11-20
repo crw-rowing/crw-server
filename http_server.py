@@ -34,7 +34,8 @@ class FileServer(BaseHTTPRequestHandler):
             self.send_response(403)  # Forbidden
             self.send_header('Content-type', 'text/html')
             self.end_headers()
-            self.wfile.write('Forbidden')
+            if write:
+                self.wfile.write('Forbidden')
         else:
             try:
                 f = open(fname)
