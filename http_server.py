@@ -40,11 +40,14 @@ class FileServer(BaseHTTPRequestHandler):
             try:
                 mime = guess_type(fname)[0] or 'text/plain'
                 f = open(fname)
+
                 self.send_response(200)  # OK
                 self.send_header('Content-type', mime)
                 self.end_headers()
+
                 if write:
                     self.wfile.write(f.read())
+
                 f.close()
             except IOError, e:
                 self.send_response(404 if e.errno == errno.ENOENT else 403)
