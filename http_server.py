@@ -38,23 +38,18 @@ class FileServer(BaseHTTPRequestHandler):
                 self.wfile.write('Forbidden')
         else:
             try:
+                mime = guess_type(fname)[0] or 'text/plain'
                 f = open(fname)
                 self.send_response(200)  # OK
-                mime = guess_type(fname)[0] or 'text/plain'
                 self.send_header('Content-type', mime)
                 self.end_headers()
                 if write:
                     self.wfile.write(f.read())
                 f.close()
             except IOError, e:
-                if e.errno == errno.ENOENT:
-                    self.send_response(404)  # Not Found
-                    self.send_header('Content-type', 'text/html')
-                    self.end_headers()
-                else:
-                    self.send_response(403)  # Forbidden
-                    self.send_header('Content-type', 'text/html')
-                    self.end_headers()
+                self.send_response(404 if e.errno == errno.ENOENT else 403)
+                self.send_header('Content-type', 'text/html')
+                self.end_headers()
 
                 if write:
                     self.wfile.write(
