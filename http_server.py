@@ -7,7 +7,10 @@ import ergon
 
 def serve(host, port):
     httpd = HTTPServer((host, port), FileServer)
-    httpd.serve_forever()
+    try:
+        httpd.serve_forever()
+    except KeyboardInterrupt:
+        pass
     httpd.server_close()
 
 
