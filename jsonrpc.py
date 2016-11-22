@@ -6,23 +6,32 @@ class JsonRPC:
 
     def execute(self, payload):
         def execute_single(data):
-            if type(data) != dict or \
-                    'jsonrpc' not in data or \
-                    data['jsonrpc'] != JsonRPC.version:
-                raise RPCError.invalid_request
-
             response = {
                 'jsonrpc': JsonRPC.version,
+                'id': None
             }
+            try:
+                if type(data) != dict or \
+                        'jsonrpc' not in data or \
+                        data['jsonrpc'] != JsonRPC.version or \
+                        'method' not in data:
+                    raise RPCError.invalid_request
 
-            # TODO execute method
+                if 'id' in data:
+                    response['id'] = data['id']
+                else:
+                    response = None
 
-            if 'id' in data:
-                response['id'] = data['id']
-            else:
-                response = None
-
-            return response
+                meth = data['method']
+                # Ensure it is a method overridden in JsonRPC subclass
+                if hasattr(self, meth) and not hasattr(JsonRPC, meth):
+                    response['result'] = getattr(self, meth)()
+                else:
+                    raise RPCError.method_not_found
+            except RPCError as e:
+                response['error'] = e.serialize()
+            finally:
+                return response
 
         response = {
             'jsonrpc': JsonRPC.version,
