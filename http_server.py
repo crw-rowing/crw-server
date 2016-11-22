@@ -49,7 +49,7 @@ class FileServer(BaseHTTPRequestHandler):
         else:
             try:
                 mime = guess_type(fname)[0] or 'text/plain'
-                f = open(fname)
+                f = open(fname, 'rb')
 
                 self.send_response(200)  # OK
                 self.send_header('Content-type', mime)
