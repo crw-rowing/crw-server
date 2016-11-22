@@ -23,9 +23,21 @@ class JsonRPC:
                     response = None
 
                 meth = data['method']
+                params = data['params'] if 'params' in data else None
+                
+                if params is not None and type(params) not in (dict, list):
+                    raise RPCError.invalid_params
+                
                 # Ensure it is a method overridden in JsonRPC subclass
                 if hasattr(self, meth) and not hasattr(JsonRPC, meth):
-                    response['result'] = getattr(self, meth)()
+                    m = getattr(self, meth)
+                    if type(params) is list:
+                        result = m(*params)
+                    elif type(params) is dict:
+                        result = m(**params)
+                    else:
+                        result = m()
+                    response['result'] = result
                 else:
                     raise RPCError.method_not_found
             except RPCError as e:
