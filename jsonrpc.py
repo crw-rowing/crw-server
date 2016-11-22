@@ -4,8 +4,8 @@ import json
 class JsonRpcServer:
     version = '2.0'
 
-    def execute(self, payload):
-        def execute_single(data):
+    def rpc_invoke(self, payload):
+        def rpc_invoke_single(data):
             response = {
                 'jsonrpc': JsonRpcServer.version,
                 'id': None
@@ -54,9 +54,9 @@ class JsonRpcServer:
             data = json.loads(payload)
             if type(data) == list:  # Batch response
                 response = filter(lambda x: x is not None,
-                                  map(execute_single, data))
+                                  map(rpc_invoke_single, data))
             else:
-                response = execute_single(data)
+                response = rpc_invoke_single(data)
         except ValueError:
             response['error'] = RPCError.parse.serialize()
         except RPCError as e:
