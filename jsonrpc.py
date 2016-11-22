@@ -34,7 +34,7 @@ class JsonRpcServer:
                     response = None
 
                 meth = data['method']
-                params = data['params'] if 'params' in data else None
+                params = data.get('params', None)
 
                 if params is not None and type(params) not in (dict, list):
                     raise RPCError.invalid_params
