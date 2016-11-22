@@ -2,9 +2,20 @@ import json
 
 
 class JsonRpcServer:
+    """
+    Superclass for JSON-RPC method servers.
+    Subclasses can simply implement methods, which will be automatically
+    available for the JSON-RPC protocol.
+    Reserved method names are `version`, `rpc_invoke` and the default
+    object members.
+    """
     version = '2.0'
 
     def rpc_invoke(self, payload):
+        """
+        Execute a JSON-RPC request and return the response as JSON.
+        Supports batch requests.
+        """
         def rpc_invoke_single(data):
             response = {
                 'jsonrpc': JsonRpcServer.version,
@@ -69,6 +80,9 @@ class JsonRpcServer:
 
 
 class RPCError(Exception):
+    """
+    JSON-RPC specific error.
+    """
     def __init__(self, code, message):
         self.code = code
         self.message = message
@@ -77,6 +91,9 @@ class RPCError(Exception):
         return '{}, {}'.format(self.code, self.message)
 
     def serialize(self):
+        """
+        Format the error as a dict which can be used in the error response JSON.
+        """
         return {
             'code': self.code,
             'message': self.message
