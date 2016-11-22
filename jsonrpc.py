@@ -6,7 +6,9 @@ class JsonRPC:
 
     def execute(self, payload):
         def execute_single(data):
-            if type(data) != dict:
+            if type(data) != dict or \
+                'jsonrpc' not in data or \
+                data['jsonrpc'] != JsonRPC.version:
                 raise ValueError
 
             response = {
@@ -16,7 +18,7 @@ class JsonRPC:
             # TODO execute method
 
             if 'id' in data:
-                response[id] = data[id]
+                response['id'] = data['id']
             else:
                 response = None
 
@@ -24,6 +26,7 @@ class JsonRPC:
 
         response = {
             'jsonrpc': JsonRPC.version,
+            'id': None,
         }
 
         try:
@@ -34,7 +37,9 @@ class JsonRPC:
             else:
                 response = execute_single(data)
         except ValueError:
-            # TODO invalid JSON error (-32700)
-            pass
+            response['error'] = {
+                'code': -32700,
+                'message': 'Invalid request'
+            }
         finally:
             return None if response is None else json.dumps(response)
