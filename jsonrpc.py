@@ -45,12 +45,6 @@ class JsonRPC:
 
 
 class RPCError(Exception):
-    parse = RPCError(-32700, 'Invalid JSON')
-    invalid_request = RPCError(-32600, 'Invalid request')
-    method_not_found = RPCError(-32601, 'Method not found')
-    invalid_params = RPCError(-32602, 'Invalid method parameters')
-    internal_error = RPCError(-32603, 'Internal JSON-RPC error')
-
     def __init__(self, code, message):
         self.code = code
         self.message = message
@@ -63,3 +57,10 @@ class RPCError(Exception):
             'code': self.code,
             'message': self.message
         }
+
+
+RPCError.parse = RPCError(-32700, 'Invalid JSON')
+RPCError.invalid_request = RPCError(-32600, 'Invalid request')
+RPCError.method_not_found = RPCError(-32601, 'Method not found')
+RPCError.invalid_params = RPCError(-32602, 'Invalid method parameters')
+RPCError.internal_error = RPCError(-32603, 'Internal JSON-RPC error')
