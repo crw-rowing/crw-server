@@ -3,10 +3,13 @@ from mimetypes import guess_type
 from posixpath import normpath
 import errno
 import ergon
+from ergon_jsonrpc import ErgonJsonRpc
 
 
 def serve(host, port):
+    global httpd, rpc
     httpd = HTTPServer((host, port), FileServer)
+    rpc = ErgonJsonRpc()
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:
@@ -73,3 +76,14 @@ class FileServer(BaseHTTPRequestHandler):
 
     def do_GET(self):
         self.send_file(self.path)
+
+    def do_POST(self):
+        if self.path == '/rpc':
+            length = int(self.headers.getheader('content-length'))
+            request = self.rfile.read(length)
+            response = rpc.rpc_invoke(request)
+
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            self.wfile.write(response)
