@@ -1,19 +1,19 @@
 import json
 
 
-class JsonRPC:
+class JsonRpcServer:
     version = '2.0'
 
     def execute(self, payload):
         def execute_single(data):
             response = {
-                'jsonrpc': JsonRPC.version,
+                'jsonrpc': JsonRpcServer.version,
                 'id': None
             }
             try:
                 if type(data) != dict or \
                         'jsonrpc' not in data or \
-                        data['jsonrpc'] != JsonRPC.version or \
+                        data['jsonrpc'] != JsonRpcServer.version or \
                         'method' not in data:
                     raise RPCError.invalid_request
 
@@ -24,12 +24,12 @@ class JsonRPC:
 
                 meth = data['method']
                 params = data['params'] if 'params' in data else None
-                
+
                 if params is not None and type(params) not in (dict, list):
                     raise RPCError.invalid_params
-                
-                # Ensure it is a method overridden in JsonRPC subclass
-                if hasattr(self, meth) and not hasattr(JsonRPC, meth):
+
+                # Ensure it is a method overridden in JsonRpcServer subclass
+                if hasattr(self, meth) and not hasattr(JsonRpcServer, meth):
                     m = getattr(self, meth)
                     if type(params) is list:
                         result = m(*params)
@@ -46,7 +46,7 @@ class JsonRPC:
                 return response
 
         response = {
-            'jsonrpc': JsonRPC.version,
+            'jsonrpc': JsonRpcServer.version,
             'id': None,
         }
 
