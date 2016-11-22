@@ -92,7 +92,8 @@ class RPCError(Exception):
 
     def serialize(self):
         """
-        Format the error as a dict which can be used in the error response JSON.
+        Format the error as a dict which can
+        be used in the error response JSON.
         """
         return {
             'code': self.code,
