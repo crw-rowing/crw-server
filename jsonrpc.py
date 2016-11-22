@@ -37,11 +37,14 @@ class JsonRpcServer:
                         result = m(**params)
                     else:
                         result = m()
-                    response['result'] = result
+
+                    if response is not None:
+                        response['result'] = result
                 else:
                     raise RPCError.method_not_found
             except RPCError as e:
-                response['error'] = e.serialize()
+                if response is not None:
+                    response['error'] = e.serialize()
             finally:
                 return response
 
