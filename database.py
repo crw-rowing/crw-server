@@ -28,7 +28,7 @@ class UserDatabase:
             """SELECT email FROM users
             WHERE email = %s;""", (email,))
         if self.cursor.fetchone() is not None:
-            raise ValueError("An user with this email already exists")
+            raise ValueError('An user with this email already exists')
 
         # Find the current max_id to generate a new id that is one
         # higher
@@ -43,3 +43,17 @@ class UserDatabase:
             """INSERT INTO users (id, email, password) VALUES
             (%s, %s, %s);""", (max_id + 1, email, password))
         self.database_connection.commit()
+
+    def verify_user(self, email, password):
+        """Returns whether the given password is the same as the
+        password associated with this email address. """
+        self.cursor.execute(
+            """SELECT password FROM users
+            WHERE email = %s;""", (email,))
+
+        saved_password_tuple = self.cursor.fetchone()
+        if saved_password_tuple is None:
+            raise ValueError('There is no user associated with ' +
+                             'this email address')
+
+        return saved_password_tuple[0] == password
