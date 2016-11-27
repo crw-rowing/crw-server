@@ -57,3 +57,16 @@ class UserDatabase:
                              'this email address')
 
         return saved_password_tuple[0] == password
+
+    def get_user_id(self, email):
+        """Returns the user_id associated with this email address"""
+        self.cursor.execute(
+            """SELECT id FROM users
+            WHERE email = %s;""", (email,))
+
+        saved_id_tuple = self.cursor.fetchone()
+        if saved_id_tuple is None:
+            raise ValueError('There is no user associated with ' +
+                             'this email address')
+
+        return saved_id_tuple[0]
