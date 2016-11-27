@@ -11,7 +11,9 @@ class UserDatabase:
         This is to be used once for every database, not on every
         restart of the program"""
         self.cursor.execute(
-            """CREATE TABLE users (id INTEGER, email TEXT,
+            """CREATE TABLE users
+            (id INTEGER UNIQUE,
+            email TEXT UNIQUE,
             password TEXT);""")
         self.database_connection.commit()
 
