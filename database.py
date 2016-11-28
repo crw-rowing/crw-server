@@ -18,6 +18,12 @@ class UserDatabase:
             password TEXT);""")
         self.database_connection.commit()
 
+    def drop_user_table(self):
+        """Drops the table 'users' from the database"""
+        self.cursor.execute(
+            """DROP TABLE users;""")
+        self.database_connection.commit()
+
     def add_user(self, email, password):
         """Adds an user to the database, using the given email as
         email, the given password as password and a new id, one higher
@@ -28,7 +34,8 @@ class UserDatabase:
             """SELECT email FROM users
             WHERE email = %s;""", (email,))
         if self.cursor.fetchone() is not None:
-            raise ValueError('An user with this email already exists')
+            raise ValueError('An user with this email (' + email +
+                             ') already exists')
 
         # Find the current max_id to generate a new id that is one
         # higher
