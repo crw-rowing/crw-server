@@ -1,5 +1,10 @@
 import psycopg2
+from passlib.context import CryptContext
 
+# Global password context
+pwd_context = CryptContext(
+    schemes=["pbkdf2_sha256"]
+    )
 
 class UserDatabase:
     def __init__(self, database_name, database_user):
@@ -45,9 +50,12 @@ class UserDatabase:
         if max_id is None:
             max_id = 0
 
+        # Hash and salt the password using passlib
+        password_hash = pwd_context.hash(password)
+
         self.cursor.execute(
             """INSERT INTO users (id, email, password) VALUES
-            (%s, %s, %s);""", (max_id + 1, email, password))
+            (%s, %s, %s);""", (max_id + 1, email, password_hash))
         self.database_connection.commit()
 
     def verify_user(self, email, password):
@@ -61,8 +69,9 @@ class UserDatabase:
         if saved_password_tuple is None:
             raise ValueError('There is no user associated with ' +
                              'this email address')
+        saved_password_hash = saved_password_tuple[0]
 
-        return saved_password_tuple[0] == password
+        return pwd_context.verify(password, saved_password_hash)
 
     def get_user_id(self, email):
         """Returns the user_id associated with this email address"""
