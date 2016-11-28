@@ -33,11 +33,8 @@ class UserDatabase:
         # Find the current max_id to generate a new id that is one
         # higher
         self.cursor.execute(
-            """SELECT id FROM users;""")
-        ids = self.cursor.fetchall()
-        max_id = 0
-        for userid in ids:
-            max_id = max(userid[0], max_id)
+            """SELECT MAX(id) FROM users;""")
+        (max_id,) = self.cursor.fetchone()
 
         self.cursor.execute(
             """INSERT INTO users (id, email, password) VALUES
