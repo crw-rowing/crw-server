@@ -13,7 +13,7 @@ class UserDatabase:
         restart of the program"""
         self.cursor.execute(
             """CREATE TABLE users
-            (id INTEGER UNIQUE,
+            (id INTEGER PRIMARY KEY,
             email TEXT UNIQUE,
             password TEXT);""")
         self.database_connection.commit()
@@ -35,6 +35,8 @@ class UserDatabase:
         self.cursor.execute(
             """SELECT MAX(id) FROM users;""")
         (max_id,) = self.cursor.fetchone()
+        if max_id is None:
+            max_id = 0
 
         self.cursor.execute(
             """INSERT INTO users (id, email, password) VALUES
