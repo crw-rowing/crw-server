@@ -109,21 +109,61 @@ class UserDatabaseTest(DatabaseTest):
 
 
 class TeamDatabaseTest(DatabaseTest):
-    def test_create_team_correct_team_id(self):
+    def create_team_for_user_1(self):
         user_id = 1
         team_name = 'Team ERGON'
-        self.assertEquals(self.tdb.create_team(user_id, team_name),
+        return self.tdb.create_team(user_id, team_name)
+
+    def test_create_team_correct_team_id(self):
+        self.assertEquals(self.create_team_for_user_1(),
                           1, """Test that create_team returns 1 as first
                           team_id""")
 
     def test_create_team_correct_team_name(self):
-        user_id = 1
+        team_id = self.create_team_for_user_1()
         team_name = 'Team ERGON'
-        team_id = self.tdb.create_team(user_id, team_name)
         self.assertEquals(self.tdb.get_team_name(team_id),
                           team_name,
                           """Test that the team name is correctly
                           saved and retrieved.""")
+
+    def test_add_coach_to_correct_team(self):
+        self.create_team_for_user_1()
+        adder_id = 1
+        user_to_add_id = 2
+        self.tdb.add_user_to_team(adder_id, user_to_add_id, True)
+        (adder_team_id, _) = self.udb.get_user_team_status(adder_id)
+        (user_team_id, user_coach) = self.udb.get_user_team_status(
+            user_to_add_id)
+
+        self.assertEquals(adder_team_id, user_team_id,
+                          """Test that the user is added to the team
+                          of the adder""")
+        self.assertTrue(user_coach,
+                        """Test that the user is correctly set as
+                        coach""")
+
+    def test_add_user_to_correct_team(self):
+        self.create_team_for_user_1()
+        adder_id = 1
+        user_to_add_id = 2
+        self.tdb.add_user_to_team(adder_id, user_to_add_id, False)
+        (user_team_id, user_coach) = self.udb.get_user_team_status(
+            user_to_add_id)
+
+        self.assertFalse(user_coach, """Test that the priviliges of a
+        normal user are set correctly.""")
+
+    def test_add_user_to_team_without_team(self):
+        with self.assertRaises(ValueError) as e:
+            self.tdb.add_user_to_team(1, 2)
+
+    def test_add_non_existing_user_to_team(self):
+        """Test that adding a user that does not exist to a team
+        raises a UserDoesNotExistError"""
+        with self.assertRaises(d.UserDoesNotExistError) as e:
+            self.tdb.add_user_to_team(-1, 2)
+
 
 if __name__ == '__main__':
     suite1 = u.TestLoader()\

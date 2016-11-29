@@ -46,7 +46,7 @@ class Database:
 class UserDoesNotExistError(ValueError):
     def __init__(self, reference_type, value):
         super(UserDoesNotExistError, self).__init__(
-            'No user with ' + reference_type + '=' + value + ' exists.')
+            'No user with ' + reference_type + '=' + str(value) + ' exists.')
 
 
 class UserDatabase():
@@ -111,7 +111,7 @@ class UserDatabase():
         """Checks if an user exists with the given user_id."""
         self.d.cursor.execute(
             """SELECT id FROM users
-            WHERE id = %s""", (user_id,))
+            WHERE id = %s;""", (user_id,))
 
         return (self.d.cursor.fetchone() is not None)
 
@@ -124,7 +124,7 @@ class UserDatabase():
 
         self.d.cursor.execute(
             """SELECT team_id, coach FROM users
-            WHERE id = %s""", (user_id,))
+            WHERE id = %s;""", (user_id,))
         return self.d.cursor.fetchone()
 
 
@@ -143,7 +143,7 @@ class TeamDatabase():
         # Find the max team id, so we can choose one that is one
         # higher
         self.d.cursor.execute(
-            """SELECT MAX(id) FROM teams""")
+            """SELECT MAX(id) FROM teams;""")
         (max_team_id,) = self.d.cursor.fetchone()
         if max_team_id is None:
             max_team_id = 0
@@ -151,13 +151,13 @@ class TeamDatabase():
 
         # Create the team
         self.d.cursor.execute(
-            """INSERT INTO teams (id, name) VALUES (%s, %s)""",
+            """INSERT INTO teams (id, name) VALUES (%s, %s);""",
             (team_id, team_name))
 
         self.d.cursor.execute(
             """UPDATE users
             SET team_id = %s, coach = %s
-            WHERE id = %s""", (team_id, True, user_id))
+            WHERE id = %s;""", (team_id, True, user_id))
 
         self.d.database_connection.commit()
 
@@ -167,10 +167,33 @@ class TeamDatabase():
         """Returns the team name associated with the team_id"""
         self.d.cursor.execute(
             """SELECT name FROM teams
-            WHERE id = %s""", (team_id,))
+            WHERE id = %s;""", (team_id,))
         team_name_tuple = self.d.cursor.fetchone()
         if team_name_tuple is None:
             raise ValueError(
                 """No team found for this team_id""")
 
         return team_name_tuple[0]
+
+    def add_user_to_team(
+            self, adder_id, user_to_add_id, coach=False):
+        """Adds an user to the team of the adder (the user who is
+        adding another user) with as coach attribute `coach`"""
+        udb = UserDatabase(self.d)
+        if not udb.does_user_exist(adder_id):
+            raise UserDoesNotExistError('id', adder_id)
+        if not udb.does_user_exist(user_to_add_id):
+            raise UserDoesNotExistError('id', user_to_add_id)
+
+        (team_id, adder_coach) = udb.get_user_team_status(adder_id)
+        if team_id is None:
+            raise ValueError('The adder is not in any team')
+        if not adder_coach:
+            raise ValueError('The adder is not a coach')
+
+        self.d.cursor.execute(
+            """UPDATE users
+            SET team_id = %s, coach = %s
+            WHERE id = %s;""", (team_id, coach, user_to_add_id))
+
+        self.d.database_connection.commit()
