@@ -205,3 +205,33 @@ class TeamDatabase():
             WHERE id = %s;""", (team_id, coach, user_to_add_id))
 
         self.d.database_connection.commit()
+
+    def remove_user_from_team(
+            self, requesting_user_id, user_to_remove_id):
+        """Removes a user from the team it is in. Either the
+        requesting_user has to be the same as the user_to_remove,
+        or the requesting_user has to be a coach in the team of
+        the user_to_remove."""
+        udb = UserDatabase(self.d)
+        if not udb.does_user_exist(requesting_user_id):
+            raise UserDoesNotExistError('id', requesting_user_id)
+        if not udb.does_user_exist(user_to_remove_id):
+            raise UserDoesNotExistError('id', user_to_remove_id)
+
+        (requesting_user_team, requesting_user_coach)\
+            = udb.get_user_team_status(requesting_user_id)
+        (user_to_remove_team, _) = udb.get_user_team_status(
+            user_to_remove_id)
+
+        allowed = (requesting_user_id == user_to_remove_id) or\
+                  (requesting_user_team == user_to_remove_team and
+                   requesting_user_coach)
+        if not allowed:
+            raise ActionNotPermittedError(
+                'The user with id=' + str(requesting_user_id),
+                'remove this user from his team')
+
+        self.d.cursor.execute(
+            """UPDATE users
+            SET team_id = %s, coach = %s
+            WHERE id = %s""", (None, None, user_to_remove_id))
