@@ -61,7 +61,7 @@ class UserDatabaseTest(DatabaseTest):
             returns false""")
 
     def test_verify_non_existing_user(self):
-        with self.assertRaises(ValueError) as a:
+        with self.assertRaises(d.UserDoesNotExistError) as a:
             self.udb.verify_user('nietbestaand@email.com', 'blabla')
 
     def test_add_duplicate_user(self):
@@ -76,7 +76,7 @@ class UserDatabaseTest(DatabaseTest):
             an correct, existing email address""")
 
     def test_get_non_existing_user_id(self):
-        with self.assertRaises(ValueError) as a:
+        with self.assertRaises(d.UserDoesNotExistError) as a:
             self.udb.get_user_id('nietbestaand@email.com')
 
     def test_does_existing_user_exist(self):

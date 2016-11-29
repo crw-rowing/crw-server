@@ -43,6 +43,12 @@ class Database:
         self.database_connection.close()
 
 
+class UserDoesNotExistError(ValueError):
+    def __init__(self, reference_type, value):
+        super(UserDoesNotExistError, self).__init__(
+            'No user with ' + reference_type + '=' + value + ' exists.')
+
+
 class UserDatabase():
     def __init__(self, database):
         self.d = database
@@ -57,8 +63,7 @@ class UserDatabase():
             """SELECT email FROM users
             WHERE email = %s;""", (email,))
         if self.d.cursor.fetchone() is not None:
-            raise ValueError('An user with this email (' + email +
-                             ') already exists')
+            raise UserDoesNotExistError('email', email)
 
         # Find the current max_id to generate a new id that is one
         # higher
@@ -85,8 +90,7 @@ class UserDatabase():
 
         saved_password_tuple = self.d.cursor.fetchone()
         if saved_password_tuple is None:
-            raise ValueError('There is no user associated with ' +
-                             'this email address')
+            raise UserDoesNotExistError('email', email)
         saved_password_hash = saved_password_tuple[0]
 
         return pwd_context.verify(password, saved_password_hash)
@@ -99,8 +103,7 @@ class UserDatabase():
 
         saved_id_tuple = self.d.cursor.fetchone()
         if saved_id_tuple is None:
-            raise ValueError('There is no user associated with ' +
-                             'this email address')
+            raise UserDoesNotExistError('email', email)
 
         return saved_id_tuple[0]
 
@@ -117,8 +120,7 @@ class UserDatabase():
         be aware that both may be None when the user doesn't have a
         team yet."""
         if not self.does_user_exist(user_id):
-            raise ValueError("""There is no user associated with this
-            user id.""")
+            raise UserDoesNotExistError('id', user_id)
 
         self.d.cursor.execute(
             """SELECT team_id, coach FROM users
@@ -136,8 +138,7 @@ class TeamDatabase():
         coach.
         Returns the team_id."""
         if not UserDatabase(self.d).does_user_exist(user_id):
-            raise ValueError(
-                """No account associated with this user id""")
+            raise UserDoesNotExistError('id', user_id)
 
         # Find the max team id, so we can choose one that is one
         # higher
