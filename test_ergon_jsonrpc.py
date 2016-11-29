@@ -15,7 +15,8 @@ print 'Testing with database ' + DATABASE + ' with the user ' + user
 
 class ErgonJsonRpcTest(u.TestCase):
     def setUp(self):
-        self.db = d.UserDatabase('userdatabasetest', 'mhr')
+        self.db = d.Database(DATABASE, user)
+        self.udb = d.UserDatabase(self.db)
         self.USERS = [('kees@kmail.com', 'hunter4'),
                       ('a', 'b'),
                       ('', 'b'),
@@ -28,7 +29,7 @@ class ErgonJsonRpcTest(u.TestCase):
                       ('Jan@email.com', 'pjan')]
         self.db.init_database()
         self.populate_database()
-        self.rpc = e.ErgonJsonRpc(self.db)
+        self.rpc = e.ErgonJsonRpc(self.udb)
 
     def tearDown(self):
         self.db.drop_all_tables()
@@ -38,7 +39,7 @@ class ErgonJsonRpcTest(u.TestCase):
         """Populates the database with the users saved in the USERS
         array, by calling self.db.add_user for each."""
         for user in self.USERS:
-            self.db.add_user(user[0], user[1])
+            self.udb.add_user(user[0], user[1])
 
     def test_generate_correct_response(self):
         rpc_request = """{"jsonrpc": "2.0", "method": "echo",
@@ -80,7 +81,7 @@ class ErgonJsonRpcTest(u.TestCase):
                           result when a correct create_account request
                           has been invoked""")
 
-        self.assertTrue(self.db.verify_user('nieuw@email.com',
+        self.assertTrue(self.udb.verify_user('nieuw@email.com',
                                             'hunter4'),
                         """Test that the account has been saved
                         correctly in the database and the user
