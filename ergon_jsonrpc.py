@@ -14,7 +14,7 @@ class ErgonJsonRpc(JsonRpcServer):
             self.user_database.add_user(email, password)
             return True
         except ValueError, e:
-            raise ErgonJsonRpc.account_already_exists
+            raise error_account_already_exists
 
 
 error_account_already_exists = jsonrpc.RPCError(
