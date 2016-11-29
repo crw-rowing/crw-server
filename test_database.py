@@ -158,11 +158,17 @@ class TeamDatabaseTest(DatabaseTest):
         with self.assertRaises(ValueError) as e:
             self.tdb.add_user_to_team(1, 2)
 
+    def test_add_to_team_of_non_existing_user(self):
+        """Test that adding a user to a team, when the adder doesn't
+        have a team raises a UserDoesNotExistError"""
+        with self.assertRaises(d.UserDoesNotExistError) as e:
+            self.tdb.add_user_to_team(-1, 2)
+
     def test_add_non_existing_user_to_team(self):
         """Test that adding a user that does not exist to a team
         raises a UserDoesNotExistError"""
         with self.assertRaises(d.UserDoesNotExistError) as e:
-            self.tdb.add_user_to_team(-1, 2)
+            self.tdb.add_user_to_team(1, -1)
 
 
 if __name__ == '__main__':
