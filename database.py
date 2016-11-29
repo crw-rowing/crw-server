@@ -122,11 +122,7 @@ class TeamDatabase():
         the user_id, this user will automatically be marked as a
         coach.
         Returns the team_id."""
-        # Check if an user exists with the given user_id
-        self.d.cursor.execute(
-            """SELECT id FROM users
-            WHERE id = %s""", (user_id,))
-        if self.d.cursor.fetchone() is None:
+        if not UserDatabase(self.d).does_user_exist(user_id):
             raise ValueError(
                 """No account associated with this user id""")
 
