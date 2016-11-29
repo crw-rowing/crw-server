@@ -100,3 +100,11 @@ class UserDatabase(BaseDatabase):
                              'this email address')
 
         return saved_id_tuple[0]
+
+    def does_user_exist(self, user_id):
+        """Checks if an user exists with the given user_id."""
+        self.cursor.execute(
+            """SELECT id FROM users
+            WHERE id = %s""", (user_id,))
+
+        return (self.cursor.fetchone() is not None)

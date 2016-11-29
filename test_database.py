@@ -75,6 +75,16 @@ class UserDatabaseTest(u.TestCase):
         with self.assertRaises(ValueError) as a:
             self.db.get_user_id('nietbestaand@email.com')
 
+    def test_does_existing_user_exist(self):
+        self.assertTrue(self.db.does_user_exist(1),
+                        """Test that does_user_exist returns true with
+                        an existing user_id""")
+
+    def test_does_not_existing_user_exist(self):
+        self.assertFalse(self.db.does_user_exist(len(self.USERS) + 2),
+                         """Test that does_user_exist returns false for
+                         an non-existing user_id""")
+
 
 if __name__ == '__main__':
     suite = u.TestLoader()\
