@@ -112,6 +112,19 @@ class UserDatabase():
 
         return (self.d.cursor.fetchone() is not None)
 
+    def get_user_team_status(self, user_id):
+        """Returns (team_id, coach) of the user with the id user_id,
+        be aware that both may be None when the user doesn't have a
+        team yet."""
+        if not self.does_user_exist(user_id):
+            raise ValueError("""There is no user associated with this
+            user id.""")
+
+        self.d.cursor.execute(
+            """SELECT team_id, coach FROM users
+            WHERE id = %s""", (user_id,))
+        return self.d.cursor.fetchone()
+
 
 class TeamDatabase():
     def __init__(self, database):

@@ -15,6 +15,7 @@ class DatabaseTest(u.TestCase):
     def setUp(self):
         self.db = d.Database(DATABASE, user)
         self.udb = d.UserDatabase(self.db)
+        self.tdb = d.TeamDatabase(self.db)
         self.USERS = [('kees@kmail.com', 'hunter4'),
                       ('a', 'b'),
                       ('', 'b'),
@@ -88,15 +89,26 @@ class UserDatabaseTest(DatabaseTest):
                          """Test that does_user_exist returns false for
                          an non-existing user_id""")
 
+    def test_get_user_team_status_no_team(self):
+        (team_id, coach) = self.udb.get_user_team_status(1)
+        self.assertEqual(team_id, None,
+                         """Test that the team_id returned by
+                         get_user_team_status is None if the user
+                         isn't in a team.""")
+
+    def test_get_user_team_status_coach(self):
+        user_id = 1
+        team_id = self.tdb.create_team(user_id, 'ERGON')
+        (user_team_id, coach) = self.udb.get_user_team_status(user_id)
+        self.assertEqual(team_id, user_team_id,
+                         """Test that the correct team_id is saved for
+                         the creator in the users table""")
+        self.assertEqual(coach, True,
+                         """Test that the creator of the team is set
+                         as an coach in the users table""")
+
 
 class TeamDatabaseTest(DatabaseTest):
-    def setUp(self):
-        super(TeamDatabaseTest, self).setUp()
-        self.tdb = d.TeamDatabase(self.db)
-
-    def tearDown(self):
-        super(TeamDatabaseTest, self).tearDown()
-
     def test_create_team_correct_team_id(self):
         user_id = 1
         team_name = 'Team ERGON'
@@ -112,7 +124,6 @@ class TeamDatabaseTest(DatabaseTest):
                           team_name,
                           """Test that the team name is correctly
                           saved and retrieved.""")
-
 
 if __name__ == '__main__':
     suite1 = u.TestLoader()\
