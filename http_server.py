@@ -7,10 +7,10 @@ from ergon_jsonrpc import ErgonJsonRpc
 import database
 
 
-def serve(host, port, database, database_user):
+def serve(host, port, database_name, database_user):
     global httpd, user_database, rpc
     httpd = HTTPServer((host, port), FileServer)
-    user_database = database.UserDatabase(database, database_user)
+    user_database = database.UserDatabase(database_name, database_user)
     rpc = ErgonJsonRpc(user_database)
     try:
         httpd.serve_forever()
