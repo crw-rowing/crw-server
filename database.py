@@ -6,6 +6,7 @@ pwd_context = CryptContext(
     schemes=["pbkdf2_sha256"]
     )
 
+
 class UserDatabase:
     def __init__(self, database_name, database_user):
         self.database_connection = psycopg2.connect(database=database_name,
@@ -28,6 +29,11 @@ class UserDatabase:
         self.cursor.execute(
             """DROP TABLE users;""")
         self.database_connection.commit()
+
+    def close_database_connection(self):
+        """Closes the database_connection and the cursor"""
+        self.cursor.close()
+        self.database_connection.close()
 
     def add_user(self, email, password):
         """Adds an user to the database, using the given email as

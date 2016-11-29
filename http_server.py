@@ -4,12 +4,14 @@ from posixpath import normpath
 import errno
 import ergon
 from ergon_jsonrpc import ErgonJsonRpc
+import database
 
 
-def serve(host, port):
-    global httpd, rpc
+def serve(host, port, database, database_user):
+    global httpd, user_database, rpc
     httpd = HTTPServer((host, port), FileServer)
-    rpc = ErgonJsonRpc()
+    user_database = database.UserDatabase(database, database_user)
+    rpc = ErgonJsonRpc(user_database)
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:

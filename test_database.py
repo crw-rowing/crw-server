@@ -29,6 +29,7 @@ class UserDatabaseTest(u.TestCase):
 
     def tearDown(self):
         self.db.drop_user_table()
+        self.db.close_database_connection()
 
     def populate_database(self):
         """Populates the database with the users saved in the USERS
