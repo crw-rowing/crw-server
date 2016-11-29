@@ -104,6 +104,15 @@ class TeamDatabaseTest(DatabaseTest):
                           1, """Test that create_team returns 1 as first
                           team_id""")
 
+    def test_create_team_correct_team_name(self):
+        user_id = 1
+        team_name = 'Team ERGON'
+        team_id = self.tdb.create_team(user_id, team_name)
+        self.assertEquals(self.tdb.get_team_name(team_id),
+                          team_name,
+                          """Test that the team name is correctly
+                          saved and retrieved.""")
+
 
 if __name__ == '__main__':
     suite1 = u.TestLoader()\

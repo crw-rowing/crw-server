@@ -152,3 +152,15 @@ class TeamDatabase():
         self.d.database_connection.commit()
 
         return team_id
+
+    def get_team_name(self, team_id):
+        """Returns the team name associated with the team_id"""
+        self.d.cursor.execute(
+            """SELECT name FROM teams
+            WHERE id = %s""", (team_id,))
+        team_name_tuple = self.d.cursor.fetchone()
+        if team_name_tuple is None:
+            raise ValueError(
+                """No team found for this team_id""")
+
+        return team_name_tuple[0]
