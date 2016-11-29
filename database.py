@@ -49,6 +49,12 @@ class UserDoesNotExistError(ValueError):
             'No user with ' + reference_type + '=' + str(value) + ' exists.')
 
 
+class ActionNotPermittedError(ValueError):
+    def __init__(self, who, what):
+        super(ActionNotPermittedError, self).__init__(
+            str(who) + ' is not permitted to ' + str(what))
+
+
 class UserDatabase():
     def __init__(self, database):
         self.d = database
@@ -189,7 +195,9 @@ class TeamDatabase():
         if team_id is None:
             raise ValueError('The adder is not in any team')
         if not adder_coach:
-            raise ValueError('The adder is not a coach')
+            raise ActionNotPermittedError(
+                'The user with id=' + str(adder_id),
+                'add an user to a team, because he/she isn\'t a coach')
 
         self.d.cursor.execute(
             """UPDATE users
