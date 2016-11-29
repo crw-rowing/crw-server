@@ -82,7 +82,7 @@ class ErgonJsonRpcTest(u.TestCase):
                           has been invoked""")
 
         self.assertTrue(self.udb.verify_user('nieuw@email.com',
-                                            'hunter4'),
+                                             'hunter4'),
                         """Test that the account has been saved
                         correctly in the database and the user
                         can be verified using the supplied
@@ -101,7 +101,7 @@ class ErgonJsonRpcTest(u.TestCase):
                         return an error).""")
 
         rpc_error = response_obj['error']
-        self.assertEquals(rpc_error['code'], -32000,
+        self.assertEquals(rpc_error['code'], 1,
                           """Test that the correct error code is
                           returned for a duplicate account""")
 
