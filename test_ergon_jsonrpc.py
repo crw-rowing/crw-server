@@ -8,7 +8,7 @@ import json
 # same folder as this file, the name of the account you created the
 # database under..
 with open('test_database.properties') as propFile:
-    user = propFile.readline()
+    user = propFile.read().splitlines()[0]
 DATABASE = 'userdatabasetest'
 print 'Testing with database ' + DATABASE + ' with the user ' + user
 

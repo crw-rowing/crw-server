@@ -7,7 +7,7 @@ pwd_context = CryptContext(
     )
 
 
-class BaseDatabase:
+class Database:
     def __init__(self, database_name, database_user):
         self.database_connection = psycopg2.connect(database=database_name,
                                                     user=database_user)
@@ -43,44 +43,47 @@ class BaseDatabase:
         self.database_connection.close()
 
 
-class UserDatabase(BaseDatabase):
+class UserDatabase():
+    def __init__(self, database):
+        self.d = database
+
     def add_user(self, email, password):
         """Adds an user to the database, using the given email as
         email, the given password as password and a new id, one higher
         than the highest id in the database."""
 
         # Check if there isn't already an user with this email address
-        self.cursor.execute(
+        self.d.cursor.execute(
             """SELECT email FROM users
             WHERE email = %s;""", (email,))
-        if self.cursor.fetchone() is not None:
+        if self.d.cursor.fetchone() is not None:
             raise ValueError('An user with this email (' + email +
                              ') already exists')
 
         # Find the current max_id to generate a new id that is one
         # higher
-        self.cursor.execute(
+        self.d.cursor.execute(
             """SELECT MAX(id) FROM users;""")
-        (max_id,) = self.cursor.fetchone()
+        (max_id,) = self.d.cursor.fetchone()
         if max_id is None:
             max_id = 0
 
         # Hash and salt the password using passlib
         password_hash = pwd_context.hash(password)
 
-        self.cursor.execute(
+        self.d.cursor.execute(
             """INSERT INTO users (id, email, password) VALUES
             (%s, %s, %s);""", (max_id + 1, email, password_hash))
-        self.database_connection.commit()
+        self.d.database_connection.commit()
 
     def verify_user(self, email, password):
         """Returns whether the given password is the same as the
         password associated with this email address. """
-        self.cursor.execute(
+        self.d.cursor.execute(
             """SELECT password FROM users
             WHERE email = %s;""", (email,))
 
-        saved_password_tuple = self.cursor.fetchone()
+        saved_password_tuple = self.d.cursor.fetchone()
         if saved_password_tuple is None:
             raise ValueError('There is no user associated with ' +
                              'this email address')
@@ -90,11 +93,11 @@ class UserDatabase(BaseDatabase):
 
     def get_user_id(self, email):
         """Returns the user_id associated with this email address"""
-        self.cursor.execute(
+        self.d.cursor.execute(
             """SELECT id FROM users
             WHERE email = %s;""", (email,))
 
-        saved_id_tuple = self.cursor.fetchone()
+        saved_id_tuple = self.d.cursor.fetchone()
         if saved_id_tuple is None:
             raise ValueError('There is no user associated with ' +
                              'this email address')
@@ -103,8 +106,49 @@ class UserDatabase(BaseDatabase):
 
     def does_user_exist(self, user_id):
         """Checks if an user exists with the given user_id."""
-        self.cursor.execute(
+        self.d.cursor.execute(
             """SELECT id FROM users
             WHERE id = %s""", (user_id,))
 
-        return (self.cursor.fetchone() is not None)
+        return (self.d.cursor.fetchone() is not None)
+
+
+class TeamDatabase():
+    def __init__(self, database):
+        self.d = database
+
+    def create_team(self, user_id, team_name):
+        """Creates a new team with one member, the user referenced by
+        the user_id, this user will automatically be marked as a
+        coach.
+        Returns the team_id."""
+        # Check if an user exists with the given user_id
+        self.d.cursor.execute(
+            """SELECT id FROM users
+            WHERE id = %s""", (user_id,))
+        if self.d.cursor.fetchone() is None:
+            raise ValueError(
+                """No account associated with this user id""")
+
+        # Find the max team id, so we can choose one that is one
+        # higher
+        self.d.cursor.execute(
+            """SELECT MAX(id) FROM teams""")
+        (max_team_id,) = self.d.cursor.fetchone()
+        if max_team_id is None:
+            max_team_id = 0
+        team_id = max_team_id + 1
+
+        # Create the team
+        self.d.cursor.execute(
+            """INSERT INTO teams (id, name) VALUES (%s, %s)""",
+            (team_id, team_name))
+
+        self.d.cursor.execute(
+            """UPDATE users
+            SET team_id = %s, coach = %s
+            WHERE id = %s""", (team_id, True, user_id))
+
+        self.d.database_connection.commit()
+
+        return team_id
