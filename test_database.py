@@ -107,6 +107,12 @@ class UserDatabaseTest(DatabaseTest):
                          """Test that the creator of the team is set
                          as an coach in the users table""")
 
+    def test_get_user_team_status_no_user(self):
+        """Test that getting the status of a non existing user, raises
+        a UserDoesNotExistError"""
+        with self.assertRaises(d.UserDoesNotExistError) as e:
+            self.udb.get_user_team_status(-1)
+
 
 class TeamDatabaseTest(DatabaseTest):
     def create_team_for_user_1(self):
@@ -126,6 +132,18 @@ class TeamDatabaseTest(DatabaseTest):
                           team_name,
                           """Test that the team name is correctly
                           saved and retrieved.""")
+
+    def test_get_team_name_no_team(self):
+        """Test that attempting to retrieve the name of a team that
+        doesn't exist raises a ValueError"""
+        with self.assertRaises(ValueError) as e:
+            self.tdb.get_team_name(-1)
+
+    def test_create_team_no_user(self):
+        """Test that creating a team with an user_id that doesn't
+        exist raises a UserDoesNotExistError."""
+        with self.assertRaises(d.UserDoesNotExistError) as e:
+            self.tdb.create_team(-1, 'leet')
 
     def test_add_coach_to_correct_team(self):
         self.create_team_for_user_1()
@@ -169,6 +187,15 @@ class TeamDatabaseTest(DatabaseTest):
         raises a UserDoesNotExistError"""
         with self.assertRaises(d.UserDoesNotExistError) as e:
             self.tdb.add_user_to_team(1, -1)
+
+    def test_add_user_to_team_no_coach(self):
+        """Test that a team member that isn't a coach can't add users
+        to his team"""
+        team_id = self.create_team_for_user_1()
+        self.tdb.add_user_to_team(1, 2, False)
+
+        with self.assertRaises(d.ActionNotPermittedError) as e:
+            self.tdb.add_user_to_team(2, 3)
 
 
 if __name__ == '__main__':
