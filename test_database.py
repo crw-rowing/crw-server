@@ -28,7 +28,7 @@ class UserDatabaseTest(u.TestCase):
         self.populate_database()
 
     def tearDown(self):
-        self.db.drop_user_table()
+        self.db.drop_all_tables()
         self.db.close_database_connection()
 
     def populate_database(self):

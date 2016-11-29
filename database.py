@@ -7,27 +7,34 @@ pwd_context = CryptContext(
     )
 
 
-class UserDatabase:
+class BaseDatabase:
     def __init__(self, database_name, database_user):
         self.database_connection = psycopg2.connect(database=database_name,
                                                     user=database_user)
         self.cursor = self.database_connection.cursor()
 
     def init_database(self):
-        """Creates the table structure of 'users' in the database.
-        This is to be used once for every database, not on every
-        restart of the program"""
+        """Creates the table structure in the database.  This is to be used
+        once for every database, not on every restart of the program."""
+        self.cursor.execute(
+            """CREATE TABLE teams
+            (id INTEGER PRIMARY KEY,
+            name TEXT NOT NULL)""")
         self.cursor.execute(
             """CREATE TABLE users
             (id INTEGER PRIMARY KEY,
             email TEXT UNIQUE,
-            password TEXT);""")
+            password TEXT,
+            team_id INTEGER REFERENCES teams(id),
+            coach BOOLEAN);""")
         self.database_connection.commit()
 
-    def drop_user_table(self):
-        """Drops the table 'users' from the database"""
+    def drop_all_tables(self):
+        """Drops all tables from the database"""
         self.cursor.execute(
             """DROP TABLE users;""")
+        self.cursor.execute(
+            """DROP TABLE teams""")
         self.database_connection.commit()
 
     def close_database_connection(self):
@@ -35,6 +42,8 @@ class UserDatabase:
         self.cursor.close()
         self.database_connection.close()
 
+
+class UserDatabase(BaseDatabase):
     def add_user(self, email, password):
         """Adds an user to the database, using the given email as
         email, the given password as password and a new id, one higher

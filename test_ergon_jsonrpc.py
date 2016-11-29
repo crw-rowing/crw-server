@@ -31,7 +31,7 @@ class ErgonJsonRpcTest(u.TestCase):
         self.rpc = e.ErgonJsonRpc(self.db)
 
     def tearDown(self):
-        self.db.drop_user_table()
+        self.db.drop_all_tables()
         self.db.close_database_connection()
 
     def populate_database(self):
