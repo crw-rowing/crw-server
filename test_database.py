@@ -197,6 +197,50 @@ class TeamDatabaseTest(DatabaseTest):
         with self.assertRaises(d.ActionNotPermittedError) as e:
             self.tdb.add_user_to_team(2, 3)
 
+    def test_remove_member_from_team_correct(self):
+        team_id = self.create_team_for_user_1()
+        user_to_add = 2
+        self.tdb.add_user_to_team(1, user_to_add, False)
+        self.tdb.remove_user_from_team(1, user_to_add)
+        (u_team_id, _) = self.udb.get_user_team_status(user_to_add)
+
+        self.assertIsNone(u_team_id, """Test that the team_id of the
+        removed user is None, after being removed""")
+
+    def test_remove_coach_from_team_correct(self):
+        team_id = self.create_team_for_user_1()
+        user_to_add = 2
+        self.tdb.add_user_to_team(1, user_to_add, True)
+        self.tdb.remove_user_from_team(1, user_to_add)
+        (u_team_id, _) = self.udb.get_user_team_status(user_to_add)
+
+        self.assertIsNone(u_team_id, """Test that the team_id of the
+        removed user is None, after being removed""")
+
+    def test_remove_user_from_team_no_member(self):
+        """Test that an user that isn't a member that team, can't
+        add someone to that team"""
+        team_id = self.create_team_for_user_1()
+        self.tdb.add_user_to_team(1, 2)
+        self.tdb.create_team(3, 'team')
+        with self.assertRaises(d.ActionNotPermittedError) as e:
+            self.tdb.remove_user_from_team(3, 2)
+
+    def test_remove_user_from_team_no_adder(self):
+        """Test that if the user that is removing the user doesn't
+        exist, it raises a UserDoesNotExistError"""
+        team_id = self.create_team_for_user_1()
+        self.tdb.add_user_to_team(1, 2)
+        with self.assertRaises(d.UserDoesNotExistError) as e:
+            self.tdb.remove_user_from_team(-1, 2)
+
+    def test_remove_user_from_team_no_user(self):
+        """Test that if the user that is attempting to be removed
+        doesn't exist, an UserDoesNotExistError is raised"""
+        team_id = self.create_team_for_user_1()
+        with self.assertRaises(d.UserDoesNotExistError) as e:
+            self.tdb.remove_user_from_team(1, -1)
+
 
 if __name__ == '__main__':
     suite1 = u.TestLoader()\
