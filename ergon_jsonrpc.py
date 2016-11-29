@@ -17,6 +17,6 @@ class ErgonJsonRpc(JsonRpcServer):
             raise ErgonJsonRpc.account_already_exists
 
 
-ErgonJsonRpc.account_already_exists = jsonrpc.RPCError(
+error_account_already_exists = jsonrpc.RPCError(
     -32000, """There is already an account associated
     with this email""")
