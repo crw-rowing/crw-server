@@ -197,6 +197,15 @@ class TeamDatabaseTest(DatabaseTest):
         with self.assertRaises(d.ActionNotPermittedError) as e:
             self.tdb.add_user_to_team(2, 3)
 
+    def test_add_user_to_team_already_in_team(self):
+        """Test that adding a user to a team, that already is in a
+        team raises an ActionNotPermittedError"""
+        team_id = self.create_team_for_user_1()
+        self.tdb.create_team(2, 'naam')
+
+        with self.assertRaises(d.ActionNotPermittedError) as e:
+            self.tdb.add_user_to_team(1, 2)
+
     def test_remove_member_from_team_correct(self):
         team_id = self.create_team_for_user_1()
         user_to_add = 2

@@ -192,12 +192,13 @@ class TeamDatabase():
             raise UserDoesNotExistError('id', user_to_add_id)
 
         (team_id, adder_coach) = udb.get_user_team_status(adder_id)
+        (user_team_id, _) = udb.get_user_team_status(user_to_add_id)
         if team_id is None:
             raise ValueError('The adder is not in any team')
-        if not adder_coach:
+        if (not adder_coach) or (user_team_id is not None):
             raise ActionNotPermittedError(
                 'The user with id=' + str(adder_id),
-                'add an user to a team, because he/she isn\'t a coach')
+                'add the user with id=' + str(user_to_add_id))
 
         self.d.cursor.execute(
             """UPDATE users
