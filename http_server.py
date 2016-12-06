@@ -2,7 +2,7 @@ from BaseHTTPServer import HTTPServer, BaseHTTPRequestHandler
 from mimetypes import guess_type
 from posixpath import normpath
 import errno
-import crw
+from crw import VERSION
 from crw_jsonrpc import CrwJsonRpc
 import database
 
@@ -25,7 +25,7 @@ class FileServer(BaseHTTPRequestHandler):
         '': 'static/index.html',
         'favicon.ico': 'static/favicon.ico',
     }
-    server_version = "crw/{}".format(crw.VERSION)
+    server_version = "crw/{}".format(VERSION)
 
     def resolve_filename(self, fname):
         """
