@@ -1,5 +1,5 @@
-# ergon-server
-Server software for Ergon Planning
+# crw-server
+Server software for crw Rowing
 
 # Dependencies
 
