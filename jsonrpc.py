@@ -56,6 +56,8 @@ class JsonRpcServer:
             except RPCError as e:
                 if response is not None:
                     response['error'] = e.serialize()
+            except Exception as e:
+                response['error'] = RPCError.internal_error(e).serialize()
             finally:
                 return response
 
@@ -83,26 +85,33 @@ class RPCError(Exception):
     """
     JSON-RPC specific error.
     """
-    def __init__(self, code, message):
+    def __init__(self, code, message, data=None):
         self.code = code
         self.message = message
+        self.data = data
 
     def __str__(self):
-        return '{}, {}'.format(self.code, self.message)
+        return '{}, {}, {}'.format(self.code, self.message, self.data)
 
     def serialize(self):
         """
         Format the error as a dict which can
         be used in the error response JSON.
         """
-        return {
+        d = {
             'code': self.code,
             'message': self.message
         }
+
+        if self.data is not None:
+            d['data'] = str(self.data)
+
+        return d
 
 
 RPCError.parse = RPCError(-32700, 'Invalid JSON')
 RPCError.invalid_request = RPCError(-32600, 'Invalid request')
 RPCError.method_not_found = RPCError(-32601, 'Method not found')
 RPCError.invalid_params = RPCError(-32602, 'Invalid method parameters')
-RPCError.internal_error = RPCError(-32603, 'Internal JSON-RPC error')
+RPCError.internal_error = lambda e: \
+    RPCError(-32603, 'Internal JSON-RPC error', data=e)
