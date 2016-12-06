@@ -46,16 +46,16 @@ class Database:
 class UserDoesNotExistError(ValueError):
     def __init__(self, reference_type, value):
         super(UserDoesNotExistError, self).__init__(
-            'No user with ' + reference_type + '=' + str(value) + ' exists.')
+            'No user with {}={} exists.'.format(reference_type, value))
 
 
 class ActionNotPermittedError(ValueError):
     def __init__(self, who, what):
         super(ActionNotPermittedError, self).__init__(
-            str(who) + ' is not permitted to ' + str(what))
+            '{} is not permitted to {}'.format(who, what))
 
 
-class UserDatabase():
+class UserDatabase:
     def __init__(self, database):
         self.d = database
 
@@ -134,7 +134,7 @@ class UserDatabase():
         return self.d.cursor.fetchone()
 
 
-class TeamDatabase():
+class TeamDatabase:
     def __init__(self, database):
         self.d = database
 
@@ -197,8 +197,8 @@ class TeamDatabase():
             raise ValueError('The adder is not in any team')
         if (not adder_coach) or (user_team_id is not None):
             raise ActionNotPermittedError(
-                'The user with id=' + str(adder_id),
-                'add the user with id=' + str(user_to_add_id))
+                'The user with id={}'.format(adder_id),
+                'add the user with id={}'.format(user_to_add_id))
 
         self.d.cursor.execute(
             """UPDATE users
@@ -229,8 +229,8 @@ class TeamDatabase():
                    requesting_user_coach)
         if not allowed:
             raise ActionNotPermittedError(
-                'The user with id=' + str(requesting_user_id),
-                'remove this user from his team')
+                'The user with id={}'.format(requesting_user_id),
+                'remove this user from this team')
 
         self.d.cursor.execute(
             """UPDATE users
