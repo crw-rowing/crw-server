@@ -27,6 +27,12 @@ class Database:
             password TEXT,
             team_id INTEGER REFERENCES teams(id),
             coach BOOLEAN);""")
+		self.cursor.execute(
+			"""CREATE TABLE sessions
+			(id TEXT PRIMARY KEY,
+			user_id INTEGER REFERENCES users(id) NOT NULL,
+			exp_date DATE NOT NULL);
+			""")
         self.database_connection.commit()
 
     def drop_all_tables(self):
