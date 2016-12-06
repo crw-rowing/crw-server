@@ -1,5 +1,5 @@
-from ergon import DATABASE
-from ergon import DATABASE_USER
+from crw import DATABASE
+from crw import DATABASE_USER
 import database
 
 if __name__ == '__main__':

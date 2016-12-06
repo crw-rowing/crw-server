@@ -1,6 +1,6 @@
 import unittest as u
 import database as d
-import ergon_jsonrpc as e
+import crw_jsonrpc as e
 import json
 
 # Before testing, make an empty database named userdatabasetest and
@@ -13,7 +13,7 @@ DATABASE = 'userdatabasetest'
 print 'Testing with database ' + DATABASE + ' with the user ' + user
 
 
-class ErgonJsonRpcTest(u.TestCase):
+class CrwJsonRpcTest(u.TestCase):
     def setUp(self):
         self.db = d.Database(DATABASE, user)
         self.udb = d.UserDatabase(self.db)
@@ -29,7 +29,7 @@ class ErgonJsonRpcTest(u.TestCase):
                       ('Jan@email.com', 'pjan')]
         self.db.init_database()
         self.populate_database()
-        self.rpc = e.ErgonJsonRpc(self.udb)
+        self.rpc = e.CrwJsonRpc(self.udb)
 
     def tearDown(self):
         self.db.drop_all_tables()
@@ -108,5 +108,5 @@ class ErgonJsonRpcTest(u.TestCase):
 
 if __name__ == '__main__':
     suite = u.TestLoader()\
-                    .loadTestsFromTestCase(ErgonJsonRpcTest)
+                    .loadTestsFromTestCase(CrwJsonRpcTest)
     u.TextTestRunner(verbosity=2).run(suite)

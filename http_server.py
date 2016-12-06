@@ -2,8 +2,8 @@ from BaseHTTPServer import HTTPServer, BaseHTTPRequestHandler
 from mimetypes import guess_type
 from posixpath import normpath
 import errno
-import ergon
-from ergon_jsonrpc import ErgonJsonRpc
+import crw
+from crw_jsonrpc import CrwJsonRpc
 import database
 
 
@@ -12,7 +12,7 @@ def serve(host, port, database_name, database_user):
     httpd = HTTPServer((host, port), FileServer)
     database_object = database.Database(database_name, database_user)
     user_database = database.UserDatabase(database_object)
-    rpc = ErgonJsonRpc(user_database)
+    rpc = CrwJsonRpc(user_database)
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:
@@ -25,7 +25,7 @@ class FileServer(BaseHTTPRequestHandler):
         '': 'static/index.html',
         'favicon.ico': 'static/favicon.ico',
     }
-    server_version = "Ergon/{}".format(ergon.VERSION)
+    server_version = "crw/{}".format(crw.VERSION)
 
     def resolve_filename(self, fname):
         """

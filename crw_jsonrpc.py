@@ -2,7 +2,7 @@ from jsonrpc import JsonRpcServer
 import jsonrpc
 
 
-class ErgonJsonRpc(JsonRpcServer):
+class CrwJsonRpc(JsonRpcServer):
     def __init__(self, user_database):
         self.user_database = user_database
 
