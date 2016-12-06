@@ -1,6 +1,3 @@
-import http_server
-
-
 VERSION = '0.1'
 
 HOST = ''
@@ -11,4 +8,5 @@ DATABASE = 'crw-database'
 DATABASE_USER = 'root'
 
 if __name__ == '__main__':
+    import http_server
     http_server.serve(HOST, PORT, DATABASE, DATABASE_USER)
