@@ -303,6 +303,21 @@ class SessionDatabase:
         # when the key is invalid).
         return self.d.cursor.fetchone() is not None
 
+    def renew_session_key(self, user_id, session_key,
+                          livespan=datetime.timedelta(weeks=1)):
+        """Renews the given session key for the user. The key will
+        expire one week after calling this function if it isn't
+        renewed in the mean time."""
+        self.d.cursor.execute(
+            """UPDATE sessions
+            SET exp_date = %s
+            WHERE user_id = %s
+            AND key = %s;""",
+            (datetime.datetime.now() + livespan,
+             user_id, session_key))
+
+        self.d.database_connection.commit()
+
     def remove_expired_keys(self, user_id):
         """Removes all expired session keys for this user from the
         sessions database."""
