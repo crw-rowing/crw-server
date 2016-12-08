@@ -1,5 +1,6 @@
 import unittest as u
 import database as d
+import datetime
 
 # Before testing, make an empty database named userdatabasetest and
 # create an file named test_database.properties with one line in the
@@ -16,6 +17,7 @@ class DatabaseTest(u.TestCase):
         self.db = d.Database(DATABASE, user)
         self.udb = d.UserDatabase(self.db)
         self.tdb = d.TeamDatabase(self.db)
+        self.sdb = d.SessionDatabase(self.db)
         self.USERS = [('kees@kmail.com', 'hunter4'),
                       ('a', 'b'),
                       ('', 'b'),
@@ -251,10 +253,76 @@ class TeamDatabaseTest(DatabaseTest):
             self.tdb.remove_user_from_team(1, -1)
 
 
+class SessionDatabaseTest(DatabaseTest):
+    def test_generate_correct_session_key(self):
+        user_id = 2
+        session_key = self.sdb.generate_session_key(user_id)
+        self.assertTrue(self.sdb.verify_session_key
+                        (user_id, session_key),
+                        """Test that SessionDatabase generates a
+                        correct session key that can later be verified
+                        correctly.""")
+
+    def test_generate_session_key_no_user(self):
+        user_id = -1
+        with self.assertRaises(d.UserDoesNotExistError) as e:
+            self.sdb.generate_session_key(user_id)
+
+    def test_verify_wrong_session_key(self):
+        session_key_1 = self.sdb.generate_session_key(1)
+        session_key_2 = self.sdb.generate_session_key(2)
+
+        self.assertFalse(self.sdb.verify_session_key
+                         (1, session_key_2),
+                         """Test that verifying an user with another
+                         users session key fails""")
+
+    def test_verify_empty_session_key(self):
+        session_key_1 = self.sdb.generate_session_key(1)
+        session_key_2 = self.sdb.generate_session_key(2)
+
+        self.assertFalse(self.sdb.verify_session_key(1, ""),
+                         """Test that verifying an user with an empty
+                         string as session key fails, but doesn't
+                         raise an error""")
+
+    def test_verify_expired_session_key(self):
+        expired_key = self.sdb.generate_session_key(1, datetime.
+                                                    timedelta(hours=-1))
+
+        self.assertFalse(self.sdb.verify_session_key(1, expired_key),
+                         """Test that verifying an user with an
+                         expired session key fails""")
+
+    def test_renew_session_key(self):
+        expired_key = self.sdb.generate_session_key(1, datetime.
+                                                    timedelta(hours=-1))
+        # Renew the key and test that it can be used again
+        self.sdb.renew_session_key(1, expired_key)
+
+        self.assertTrue(self.sdb.verify_session_key(1, expired_key),
+                        """Test that renewing an expired key makes it
+                        valid again.""")
+
+    def test_remove_outdated_keys(self):
+        expired_key = self.sdb.generate_session_key(1, datetime.
+                                                    timedelta(hours=-1))
+        self.sdb.remove_expired_keys(1)
+        # If the outdated key is correctly removed, the renewal won't
+        # help, since it doesn't exist anymore.
+        self.sdb.renew_session_key(1, expired_key)
+
+        self.assertFalse(self.sdb.verify_session_key(1, expired_key),
+                         """Test that remove_expired_keys removes
+                         expired keys""")
+
+
 if __name__ == '__main__':
     suite1 = u.TestLoader()\
               .loadTestsFromTestCase(UserDatabaseTest)
     suite2 = u.TestLoader()\
               .loadTestsFromTestCase(TeamDatabaseTest)
-    suite = u.TestSuite([suite1, suite2])
+    suite3 = u.TestLoader()\
+              .loadTestsFromTestCase(SessionDatabaseTest)
+    suite = u.TestSuite([suite1, suite2, suite3])
     u.TextTestRunner(verbosity=2).run(suite)
