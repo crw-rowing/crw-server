@@ -289,6 +289,20 @@ class SessionDatabase:
 
         return session_key
 
+    def verify_session_key(self, user_id, session_key):
+        """Checks whether the session key is correct and valid for the
+        user. Returns whether it is."""
+        self.d.cursor.execute(
+            """SELECT user_id FROM sessions
+            WHERE key = %s
+            AND exp_date > %s
+            AND user_id = %s;""",
+            (session_key, datetime.datetime.now(), user_id))
+
+        # fetchone() returns None if no matchin entry is found (ie
+        # when the key is invalid).
+        return self.d.cursor.fetchone() is not None
+
     def remove_expired_keys(self, user_id):
         """Removes all expired session keys for this user from the
         sessions database."""
