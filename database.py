@@ -1,5 +1,8 @@
 import psycopg2
 from passlib.context import CryptContext
+import random
+import string
+import datetime
 
 # Global password context
 pwd_context = CryptContext(
@@ -27,14 +30,22 @@ class Database:
             password TEXT,
             team_id INTEGER REFERENCES teams(id),
             coach BOOLEAN);""")
+        self.cursor.execute(
+            """CREATE TABLE sessions
+            (key TEXT PRIMARY KEY,
+            user_id INTEGER REFERENCES users(id) NOT NULL,
+            exp_date TIMESTAMP NOT NULL);
+            """)
         self.database_connection.commit()
 
     def drop_all_tables(self):
         """Drops all tables from the database"""
         self.cursor.execute(
+            """DROP TABLE sessions;""")
+        self.cursor.execute(
             """DROP TABLE users;""")
         self.cursor.execute(
-            """DROP TABLE teams""")
+            """DROP TABLE teams;""")
         self.database_connection.commit()
 
     def close_database_connection(self):
@@ -236,3 +247,84 @@ class TeamDatabase:
             """UPDATE users
             SET team_id = %s, coach = %s
             WHERE id = %s""", (None, None, user_to_remove_id))
+
+
+class SessionDatabase:
+    def __init__(self, database):
+        self.d = database
+
+    def generate_session_key(self, user_id,
+                             livespan=datetime.timedelta(weeks=1)):
+        """Generates and returns a new session key for the user, the user
+        should already be verified for this. The session key will be
+        saved in the sessions table and will be valid for one week.
+
+        This will (as a side effect) remove all session keys that are
+        outdated from this user from the session key database."""
+        udb = UserDatabase(self.d)
+        if not udb.does_user_exist(user_id):
+            raise UserDoesNotExistError('id', user_id)
+
+        self.remove_expired_keys(user_id)
+
+        # Generate a random, cryptographically secure string of
+        # printable characters, that will be used as session key.
+        # Based on http://stackoverflow.com/a/23728630
+        session_key_length = 32
+        session_key = ''.join(random.SystemRandom()
+                              .choice(string.ascii_letters +
+                                      string.digits)
+                              for _ in range(session_key_length))
+
+        # Set the expiration date of the session key
+        expiration_date\
+            = datetime.datetime.now() + livespan
+
+        # Inserting the key in the sessions table
+        self.d.cursor.execute(
+            """INSERT INTO sessions (key, user_id, exp_date)
+            VALUES (%s, %s, %s);""", (session_key, user_id,
+                                      expiration_date))
+        self.d.database_connection.commit()
+
+        return session_key
+
+    def verify_session_key(self, user_id, session_key):
+        """Checks whether the session key is correct and valid for the
+        user. Returns whether it is."""
+        self.d.cursor.execute(
+            """SELECT user_id FROM sessions
+            WHERE key = %s
+            AND exp_date > %s
+            AND user_id = %s;""",
+            (session_key, datetime.datetime.now(), user_id))
+
+        # fetchone() returns None if no matchin entry is found (ie
+        # when the key is invalid).
+        return self.d.cursor.fetchone() is not None
+
+    def renew_session_key(self, user_id, session_key,
+                          livespan=datetime.timedelta(weeks=1)):
+        """Renews the given session key for the user. The key will
+        expire one week after calling this function if it isn't
+        renewed in the mean time."""
+        self.d.cursor.execute(
+            """UPDATE sessions
+            SET exp_date = %s
+            WHERE user_id = %s
+            AND key = %s;""",
+            (datetime.datetime.now() + livespan,
+             user_id, session_key))
+
+        self.d.database_connection.commit()
+
+    def remove_expired_keys(self, user_id):
+        """Removes all expired session keys for this user from the
+        sessions database."""
+        self.d.cursor.execute(
+            """DELETE FROM sessions
+            WHERE user_id = %s
+            AND exp_date < %s;""", (user_id,
+                                    datetime.datetime.now()))
+
+        self.d.database_connection.commit()
