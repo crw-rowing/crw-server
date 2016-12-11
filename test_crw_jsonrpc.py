@@ -29,7 +29,7 @@ class CrwJsonRpcTest(u.TestCase):
                       ('Jan@email.com', 'pjan')]
         self.db.init_database()
         self.populate_database()
-        self.rpc = e.CrwJsonRpc(self.udb)
+        self.rpc = e.CrwJsonRpc(self.db)
 
     def tearDown(self):
         self.db.drop_all_tables()
@@ -104,6 +104,24 @@ class CrwJsonRpcTest(u.TestCase):
         self.assertEquals(rpc_error['code'], 1,
                           """Test that the correct error code is
                           returned for a duplicate account""")
+
+    def assert_result_equals(self, response, expected_result, message):
+        """Asserts that a result exists in the response and that the
+        result is equal to the expected_result."""
+        response_obj = json.loads(response)
+        self.assertTrue('result' in response_obj, """Assert that the
+        response has a result""")
+        self.assertEquals(response_obj['result'], expected_result,
+                          message)
+
+    def assert_error_equals(self, response, expected_error_code, message):
+        """Asserts that an error exists in the response and that the
+        error code is equal to the expected error code."""
+        response_obj = json.loads(response)
+        self.asserTrue('error' in response_obj,
+                       """Assert that the response has an error""")
+        self.assertEquals(response_obj['error'][code],
+                          expected_error_code, message)
 
 
 if __name__ == '__main__':
