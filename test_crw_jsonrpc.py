@@ -1,7 +1,9 @@
 import unittest as u
 import database as d
 import crw_jsonrpc as e
+import jsonrpc
 import json
+import string
 
 # Before testing, make an empty database named userdatabasetest and
 # create an file named test_database.properties with one line in the
@@ -111,10 +113,36 @@ class CrwJsonRpcTest(u.TestCase):
         """Asserts that an error exists in the response and that the
         error code is equal to the expected error code."""
         response_obj = json.loads(response)
-        self.asserTrue('error' in response_obj,
-                       """Assert that the response has an error""")
-        self.assertEquals(response_obj['error'][code],
+        self.assertTrue('error' in response_obj,
+                        """Assert that the response has an error""")
+        self.assertEquals(response_obj['error']['code'],
                           expected_error_code, message)
+
+    def test_login_valid_user_valid_session_key(self):
+        (email, password) = self.USERS[0]
+        session_key = self.rpc.login(email, password)
+
+        # Check that the session keys only contains allowed
+        # characters. See http://stackoverflow.com/a/1323374 for how
+        # this works.
+        allowed_characters = set(string.ascii_letters + string.digits)
+        self.assertTrue(set(session_key) <= allowed_characters,
+                        """Test that the generated session key
+                        contains only allowed characters.""")
+
+    def test_login_invalid_password(self):
+        """Test that attempting to login with an invalid password
+        raises an invalid account credentials RPCError"""
+        with self.assertRaises(jsonrpc.RPCError) as err:
+            self.rpc.login(self.USERS[0][0], 'incorrectpassword')
+        self.assertEquals(err.exception.code, 2)
+
+    def test_login_invalid_email(self):
+        """Test that attempting to login with an invalid email
+        raises an invalid account credentials RPCError"""
+        with self.assertRaises(jsonrpc.RPCError) as err:
+            self.rpc.login('nonexistingemail', self.USERS[0][1])
+        self.assertEquals(err.exception.code, 2)
 
 
 if __name__ == '__main__':
