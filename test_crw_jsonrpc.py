@@ -118,17 +118,23 @@ class CrwJsonRpcTest(u.TestCase):
         self.assertEquals(response_obj['error']['code'],
                           expected_error_code, message)
 
+    def assert_contains_only_characters(self, s, allowed_characters,
+                                        message):
+        # Check that the session keys only contains allowed
+        # characters. See http://stackoverflow.com/a/1323374 for how
+        # this works.
+        self.assertTrue(set(session_key) <= set(allowed_characters),
+                        message)
+
     def test_login_valid_user_valid_session_key(self):
         (email, password) = self.USERS[0]
         session_key = self.rpc.login(email, password)
 
-        # Check that the session keys only contains allowed
-        # characters. See http://stackoverflow.com/a/1323374 for how
-        # this works.
-        allowed_characters = set(string.ascii_letters + string.digits)
-        self.assertTrue(set(session_key) <= allowed_characters,
-                        """Test that the generated session key
-                        contains only allowed characters.""")
+        allowed_characters = string.ascii_letters + string.digits
+        self.assert_contains_only_characters
+        (session_key, allowed_characters,
+         """Test that the generated session key
+         contains only allowed characters.""")
 
     def test_login_invalid_password(self):
         """Test that attempting to login with an invalid password
@@ -143,6 +149,24 @@ class CrwJsonRpcTest(u.TestCase):
         with self.assertRaises(jsonrpc.RPCError) as err:
             self.rpc.login('nonexistingemail', self.USERS[0][1])
         self.assertEquals(err.exception.code, 2)
+
+    def generate_rpc_request(self, method, params):
+        """Creates an JSON RPC request. Method and params should be
+        strings."""
+        return '{"jsonrpc": "2.0", "method": "' + method + '",' +\
+            '"params": ' + params + ', "id": 2}'
+
+    def test_login_valid_request(self):
+        (email, password) = self.USERS[0]
+        request = self.generate_rpc_request("login", '["{}","{}"]'.
+                                            format(email, password))
+        response = self.rpc.rpc_invoke(request)
+        r_obj = json.loads(response)
+        allowed_characters = string.ascii_letters + string.digits
+        self.assert_contains_only_characters
+        (r_obj['result'], allowed_characters,
+         """Test that the generated session key
+         contains only allowed characters.""")
 
 
 if __name__ == '__main__':
