@@ -61,10 +61,9 @@ class CrwJsonRpcTest(u.TestCase):
                           """Test that an id corresponding to the
                           request id is included in the response""")
 
-        self.assertTrue('result' in response_obj,
-                        """Test that the response includes a result
-                        field""")
-        self.assertEquals(response_obj['result'], True)
+        self.assert_result_equals(rpc_response,  True,
+                                  """Test that the response includes a
+                                  result field""")
 
     def test_create_correct_account(self):
         rpc_request = """{"jsonrpc": "2.0", "method": "create_account",
@@ -93,17 +92,11 @@ class CrwJsonRpcTest(u.TestCase):
                         "params": ["henk@email.com", "password"],
                         "id": 2}"""
         rpc_response = self.rpc.rpc_invoke(rpc_request)
-        response_obj = json.loads(rpc_response)
 
-        self.assertTrue('error' in response_obj,
-                        """Test that the response contains an error
-                        field (since adding a duplicate account should
-                        return an error).""")
-
-        rpc_error = response_obj['error']
-        self.assertEquals(rpc_error['code'], 1,
-                          """Test that the correct error code is
-                          returned for a duplicate account""")
+        self.assert_error_equals(rpc_response, 1,
+                                 """Test that creating a duplicate
+                                 account returns a
+                                 error_account_already_exists.""")
 
     def assert_result_equals(self, response, expected_result, message):
         """Asserts that a result exists in the response and that the
