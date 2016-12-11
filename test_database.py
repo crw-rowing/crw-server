@@ -91,6 +91,17 @@ class UserDatabaseTest(DatabaseTest):
                          """Test that does_user_exist returns false for
                          an non-existing user_id""")
 
+    def test_does_existing_user_email_exist(self):
+        self.assertTrue(self.udb.does_user_email_exist(self.USERS[2][0]),
+                        """Test that does_user_email_exist returns
+                        true for an existing email address.""")
+
+    def test_does_not_existing_user_email_exist(self):
+        self.assertFalse(self.udb.does_user_email_exist(
+            'doesnotexist@email.com'),
+                         """Test that does_user_email_exist returns
+                         false for an non-existing email address.""")
+
     def test_get_user_team_status_no_team(self):
         (team_id, coach) = self.udb.get_user_team_status(1)
         self.assertEqual(team_id, None,

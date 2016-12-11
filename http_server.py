@@ -8,11 +8,10 @@ import database
 
 
 def serve(host, port, database_name, database_user):
-    global httpd, user_database, rpc
+    global httpd, database_object, rpc
     httpd = HTTPServer((host, port), FileServer)
     database_object = database.Database(database_name, database_user)
-    user_database = database.UserDatabase(database_object)
-    rpc = CrwJsonRpc(user_database)
+    rpc = CrwJsonRpc(database_object)
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:

@@ -132,6 +132,14 @@ class UserDatabase:
 
         return (self.d.cursor.fetchone() is not None)
 
+    def does_user_email_exist(self, email):
+        """Checks if an user exists with the given email."""
+        self.d.cursor.execute(
+            """SELECT email FROM users
+            WHERE email = %s;""", (email,))
+
+        return (self.d.cursor.fetchone() is not None)
+
     def get_user_team_status(self, user_id):
         """Returns (team_id, coach) of the user with the id user_id,
         be aware that both may be None when the user doesn't have a
