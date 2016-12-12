@@ -1,17 +1,19 @@
 <!DOCTYPE html>
 <html>
 <head>
-</head>
+	<script src="/static/js/rpc.js"></script>
+	</head>
 <body>
-   <form>
-    <h2>Login</h2>
+   <form id="login_form">
+	<h2>Login</h2>
 	<p>
 		Username:<br>
 		<input type="text"/> <br>
 		Password:<br>
 		<input type="password"/>
 	</p>
-	<button type="button">Login</button>
+	<input type="button" id="loginButton" value="Login" />
+	<p id="session"></p>
    </form>
    <form>
 	<h2>Register</h2>
@@ -23,5 +25,15 @@
 	</p>
 	<button type="button">Register</button>
    </form>
+<script type="text/javascript">
+	var form = document.getElementById("login_form");
+	function session(response){
+		var arr = JSON.parse(response);
+		document.getElementById("session").innerHTML = "Sessionkey:" + arr.result;
+	}
+	document.getElementById('loginButton').addEventListener('click', function() {
+		RPCcall('login', [form.elements[0].value, form.elements[1].value], session);
+	});
+	</script>
 </body>
 </html>
