@@ -19,6 +19,7 @@ class CrwJsonRpcTest(u.TestCase):
     def setUp(self):
         self.db = d.Database(DATABASE, user)
         self.udb = d.UserDatabase(self.db)
+        self.tdb = d.TeamDatabase(self.db)
         self.USERS = [('kees@kmail.com', 'hunter4'),
                       ('a', 'b'),
                       ('', 'b'),
@@ -34,6 +35,7 @@ class CrwJsonRpcTest(u.TestCase):
         self.rpc = e.CrwJsonRpc(self.db)
 
     def tearDown(self):
+
         self.db.drop_all_tables()
         self.db.close_database_connection()
 
@@ -167,6 +169,46 @@ class CrwJsonRpcTest(u.TestCase):
         (r_obj['result'], allowed_characters,
          """Test that the generated session key
          contains only allowed characters.""")
+
+    def test_create_team_correct_session(self):
+        (email, password) = self.USERS[0]
+        session_key = self.rpc.login(email, password)
+        team_name = "Team TEST"
+        team_id = self.rpc.create_team(team_name, 1, session_key)
+
+        self.assertEquals(self.tdb.get_team_name(team_id), team_name,
+                          """Test that a team with the correct id and
+                          name has been created""")
+        self.assertEquals(self.udb.get_user_team_status(1),
+                          (team_id, True),
+                          """Test that the creating user is in the
+                          correct team and is a coach""")
+
+    def test_create_team_incorrect_session(self):
+        session_key = 'incorrect key'
+
+        with self.assertRaises(jsonrpc.RPCError) as err:
+            self.rpc.create_team('Team TEST', 1, session_key)
+
+        self.assertEquals(err.exception.code, 3,
+                          """Test that the correct exception is raised
+                          when an incorrect key is provided to
+                          create_team RPC.""")
+
+    def test_create_team_incorrect_user(self):
+        (email, password) = self.USERS[0]
+        session_key = self.rpc.login(email, password)
+        team_name = "Team TEST"
+        incorrect_user_id = -1
+
+        with self.assertRaises(jsonrpc.RPCError) as err:
+            team_id = self.rpc.create_team(team_name, incorrect_user_id,
+                                           session_key)
+
+        self.assertEquals(err.exception.code, 3,
+                          """Test that the correct error is raised
+                          when a non existing user id is provided to
+                          create_team.""")
 
 
 if __name__ == '__main__':

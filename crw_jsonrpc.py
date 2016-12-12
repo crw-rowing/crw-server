@@ -29,9 +29,19 @@ class CrwJsonRpc(JsonRpcServer):
         return self.sdb.generate_session_key(
             self.udb.get_user_id(email))
 
+    def create_team(self, team_name, user_id, session_key):
+        """Creates a team with the user of user_id as an coach.
+        Returns the team_id of the created team."""
+        if not self.sdb.verify_session_key(user_id, session_key):
+            raise error_invalid_session_key
+
+        return self.tdb.create_team(user_id, team_name)
+
 
 error_account_already_exists = jsonrpc.RPCError(
     1, """There is already an account associated
     with this email""")
 error_invalid_account_credentials = jsonrpc.RPCError(
     2, """The provided credentials are incorrect""")
+error_invalid_session_key = jsonrpc.RPCError(
+    3, """The provided session key is incorrect or expired""")
