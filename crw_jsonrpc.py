@@ -16,7 +16,9 @@ class CrwJsonRpc(JsonRpcServer):
         try:
             self.udb.add_user(email, password)
             return True
-        except ValueError, e:
+        except d.PasswordFieldEmpty, e:
+            raise error_no_password_submitted
+        except d.UserDoesNotExistError, e:
             raise error_account_already_exists
 
     def login(self, email, password):
@@ -45,3 +47,5 @@ error_invalid_account_credentials = jsonrpc.RPCError(
     2, """The provided credentials are incorrect""")
 error_invalid_session_key = jsonrpc.RPCError(
     3, """The provided session key is incorrect or expired""")
+error_no_password_submitted = jsonrpc.RPCError(
+    4, """No password is entered""")

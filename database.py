@@ -59,6 +59,10 @@ class UserDoesNotExistError(ValueError):
         super(UserDoesNotExistError, self).__init__(
             'No user with {}={} exists.'.format(reference_type, value))
 
+class PasswordFieldEmpty(ValueError):
+    def __init__(self):
+        super(PasswordFieldEmpty, self).__init__(
+            'No password submitted')
 
 class ActionNotPermittedError(ValueError):
     def __init__(self, who, what):
@@ -75,6 +79,9 @@ class UserDatabase:
         email, the given password as password and a new id, one higher
         than the highest id in the database."""
 
+        # Check if password is not empty
+        if password == "":
+            raise PasswordFieldEmpty()
         # Check if there isn't already an user with this email address
         self.d.cursor.execute(
             """SELECT email FROM users
