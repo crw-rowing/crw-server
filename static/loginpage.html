@@ -13,9 +13,9 @@
 		<input type="password"/>
 	</p>
 	<input type="button" id="loginButton" value="Login" />
-	<p id="session"></p>
+	<p id="login_status"></p>
    </form>
-   <form>
+   <form id="register_form">
 	<h2>Register</h2>
 	<p>
 		Username:<br>
@@ -23,16 +23,35 @@
 		Password:<br>
 		<input type="password"/>
 	</p>
-	<button type="button">Register</button>
+	<input type="button" id="registerButton" value="Register" />
+	<p id="register_status"></p>
    </form>
 <script type="text/javascript">
-	var form = document.getElementById("login_form");
+	var login_form = document.getElementById("login_form");
+	var register_form = document.getElementById("register_form");
 	function session(response){
 		var arr = JSON.parse(response);
-		document.getElementById("session").innerHTML = "Sessionkey:" + arr.result;
+		if ("result" in arr){
+			document.getElementById("login_status").innerHTML = "Sessionkey:" + arr.result;
+		} else {
+			document.getElementById("login_status").innerHTML = "Error: " + arr.error.message + " " + arr.error.code;
+		}
 	}
+	
+	function register(response){
+		var arr = JSON.parse(response);
+		if ("result" in arr){
+			document.getElementById("register_status").innerHTML = "Account created";
+		} else {
+			document.getElementById("register_status").innerHTML = "Error: " + arr.error.message + " " + arr.error.code;
+		}
+	}
+	
 	document.getElementById('loginButton').addEventListener('click', function() {
-		RPCcall('login', [form.elements[0].value, form.elements[1].value], session);
+		RPCcall('login', [login_form.elements[0].value, login_form.elements[1].value], session);
+	});
+	document.getElementById('registerButton').addEventListener('click', function() {
+		RPCcall('create_account', [register_form.elements[0].value, register_form.elements[1].value], register);
 	});
 	</script>
 </body>
