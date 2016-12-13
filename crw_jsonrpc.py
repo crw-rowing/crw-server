@@ -52,8 +52,21 @@ class CrwJsonRpc(JsonRpcServer):
         self.tdb.add_user_to_team(user_id, user_to_add_id)
 
         return True
+    
+    def team_info(self, user_id, session_key):
+        """Returns the team id, team name and members with user id, email and coach status."""
+        if not self.sdb.verify_session_key(user_id, session_key):
+            raise error_invalid_session_key
+        
+        (team_id, coach) = self.udb.get_user_team_status(user_id)
+        if (team_id is None):
+            raise error_user_is_not_in_a_team
+        
+        team_name = self.tdb.get_team_name(team_id)
+        team_members = self.tdb.get_team_members(team_id)
+        return [team_id, team_name] + team_members
 
-
+    
 error_account_already_exists = jsonrpc.RPCError(
     1, """There is already an account associated
     with this email""")
@@ -66,3 +79,5 @@ error_no_password_submitted = jsonrpc.RPCError(
 error_invalid_action_no_coach = jsonrpc.RPCError(
     5, """The user is not a coach in a team, so they can't perform
     this action""")
+error_user_is_not_in_a_team = jsonrpc.RPCError(
+    6, """The user is not in a team""")

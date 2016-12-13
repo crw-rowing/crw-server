@@ -262,6 +262,12 @@ class TeamDatabaseTest(DatabaseTest):
         team_id = self.create_team_for_user_1()
         with self.assertRaises(d.UserDoesNotExistError) as e:
             self.tdb.remove_user_from_team(1, -1)
+    
+    def test_get_team_members_no_team(self):
+        """Test that attempting to retrieve the members of a team that
+        doesn't exist raises a ValueError"""
+        with self.assertRaises(ValueError) as e:
+            self.tdb.get_team_members(-1)
 
 
 class SessionDatabaseTest(DatabaseTest):
