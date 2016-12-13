@@ -59,10 +59,12 @@ class UserDoesNotExistError(ValueError):
         super(UserDoesNotExistError, self).__init__(
             'No user with {}={} exists.'.format(reference_type, value))
 
+
 class PasswordFieldEmpty(ValueError):
     def __init__(self):
         super(PasswordFieldEmpty, self).__init__(
             'No password submitted')
+
 
 class ActionNotPermittedError(ValueError):
     def __init__(self, who, what):

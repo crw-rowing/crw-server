@@ -21,7 +21,7 @@ class DatabaseTest(u.TestCase):
         self.USERS = [('kees@kmail.com', 'hunter4'),
                       ('a', 'b'),
                       ('', 'b'),
-                      ('ab', ''),
+                      ('ab', 'dfd'),
                       ('a\';DROP TABLE users; -- ',
                        'a\';DROP TABLE users; -- '),
                       ('henk@email.com', 'phenk'),

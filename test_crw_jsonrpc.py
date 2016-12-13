@@ -23,7 +23,7 @@ class CrwJsonRpcTest(u.TestCase):
         self.USERS = [('kees@kmail.com', 'hunter4'),
                       ('a', 'b'),
                       ('', 'b'),
-                      ('ab', ''),
+                      ('ab', 'dfd'),
                       ('a\';DROP TABLE users; -- ',
                        'a\';DROP TABLE users; -- '),
                       ('henk@email.com', 'phenk'),
@@ -31,8 +31,8 @@ class CrwJsonRpcTest(u.TestCase):
                       ('jan@email.com', 'pjan'),
                       ('Jan@email.com', 'pjan')]
         self.db.init_database()
-        self.populate_database()
         self.rpc = e.CrwJsonRpc(self.db)
+        self.populate_database()
 
     def tearDown(self):
 
@@ -44,6 +44,14 @@ class CrwJsonRpcTest(u.TestCase):
         array, by calling self.db.add_user for each."""
         for user in self.USERS:
             self.udb.add_user(user[0], user[1])
+
+        self.test_team_name = "test"
+        self.test_team_coach_id = 6
+        (email, password) = self.USERS[self.test_team_coach_id - 1]
+        self.test_team_coach_key = self.rpc.login(email, password)
+        self.test_team_id = self.rpc.create_team(
+            self.test_team_name, self.test_team_coach_id,
+            self.test_team_coach_key)
 
     def test_generate_correct_response(self):
         rpc_request = """{"jsonrpc": "2.0", "method": "echo",
@@ -209,6 +217,45 @@ class CrwJsonRpcTest(u.TestCase):
                           """Test that the correct error is raised
                           when a non existing user id is provided to
                           create_team.""")
+
+    def test_add_correct_to_team(self):
+        self.rpc.add_to_team(3, self.test_team_coach_id,
+                             self.test_team_coach_key)
+
+        (team_id, coach) = self.udb.get_user_team_status(3)
+        self.assertEquals(team_id, self.test_team_id,
+                          """Test that a user is added to the correct
+                          team with add_to_team RPC""")
+        self.assertEquals(coach, False,
+                          """Test that a user is set as __not__ a
+                          coach when they are added with the
+                          add_to_team RPC""")
+
+    def test_add_to_team_incorrect_session(self):
+        session_key = 'incorrect key'
+
+        with self.assertRaises(jsonrpc.RPCError) as err:
+            self.rpc.add_to_team(3, self.test_team_coach_id,
+                                 session_key)
+
+        self.assertEquals(err.exception.code, 3,
+                          """Test that the correct exception is raised
+                          when an incorrect key is provided to
+                          create_team RPC.""")
+
+    def test_add_to_team_not_coach(self):
+        self.rpc.add_to_team(3, self.test_team_coach_id,
+                             self.test_team_coach_key)
+        session_key = self.rpc.login(self.USERS[2][0],
+                                     self.USERS[2][1])
+
+        with self.assertRaises(jsonrpc.RPCError) as err:
+            self.rpc.add_to_team(4, 3, session_key)
+
+        self.assertEquals(err.exception.code, 5,
+                          """Test that the correct exception is raised
+                          when a user who isn't a coach attempts to
+                          add someone to his team.""")
 
 
 if __name__ == '__main__':
