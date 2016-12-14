@@ -21,7 +21,7 @@ def serve(host, port, database_name, database_user):
 
 class FileServer(BaseHTTPRequestHandler):
     redirects = {
-        '': 'static/index.html',
+        '': 'static/promo/index.html',
         'favicon.ico': 'static/favicon.ico',
     }
     server_version = "crw/{}".format(VERSION)
