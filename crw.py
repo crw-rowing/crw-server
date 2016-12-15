@@ -1,7 +1,7 @@
 VERSION = '0.1'
 
 HOST = ''
-PORT = 8000
+PORT = 4443  # User 443 on the actual server (requires root)
 # Requires a database named 'crw-database' owned by the user root,
 # or you can change these to select another database.
 DATABASE = 'crw-database'
