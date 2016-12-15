@@ -264,7 +264,7 @@ class TeamDatabase:
             """UPDATE users
             SET team_id = %s, coach = %s
             WHERE id = %s""", (None, None, user_to_remove_id))
-    
+
     def get_team_members(self, team_id):
         """Returns a list of the teammembers associated with the team_id"""
         self.d.cursor.execute(
