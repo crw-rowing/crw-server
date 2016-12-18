@@ -269,6 +269,19 @@ class CrwJsonRpcTest(u.TestCase):
                           when a user who isn't a coach attempts to
                           add someone to his team.""")
 
+    def test_my_team_info_correct(self):
+        self.set_user_and_authenticated(self.test_team_coach_id)
+        team_info = self.rpc.my_team_info()
+
+        self.assertEquals(team_info[0], self.test_team_id,
+                          """Test that the correct team id is returned""")
+        self.assertEquals(team_info[1], self.test_team_name,
+                          """Test that the correct team name is
+                          returned""")
+        self.assertEquals(team_info[2][0], self.test_team_coach_id,
+                          """Test that the first member returned is
+                          the correct coach""")
+
 
 if __name__ == '__main__':
     suite = u.TestLoader()\
