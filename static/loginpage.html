@@ -26,6 +26,12 @@
 	<input type="button" id="registerButton" value="Register" />
 	<p id="register_status"></p>
    </form>
+   <form id="team_form">
+        team_id:<br>
+        <input type="text"/>
+        <input type="button" id="teamButton" value="Team info">
+   </form>
+   <p id="team_info"></p>
 <script type="text/javascript">
 	var login_form = document.getElementById("login_form");
 	var register_form = document.getElementById("register_form");
@@ -46,6 +52,21 @@
 			document.getElementById("register_status").innerHTML = "Error: " + arr.error.message + " " + arr.error.code;
 		}
 	}
+    
+    function team(response){
+        var arr = JSON.parse(response);
+        if ("result" in arr){
+			table = "team id:" + arr.result[0] + "<br> team naam:" + arr.result[1] + "<br><table>"
+            for(i = 2; i < arr.result.length; i++){
+                table += "<tr><td>" + arr.result[i][0] + "</td><td>" + arr.result[i][1] + "</td><td>" + arr.result[i][2] + "</td></tr>"
+            }
+            table += "</table>"
+            document.getElementById("team_info").innerHTML = table;
+                
+		} else {
+			document.getElementById("team_info").innerHTML = "Error: " + arr.error.message + " " + arr.error.code;
+		}
+    }
 	
 	document.getElementById('loginButton').addEventListener('click', function() {
 		RPCcall('login', [login_form.elements[0].value, login_form.elements[1].value], session);
@@ -53,6 +74,8 @@
 	document.getElementById('registerButton').addEventListener('click', function() {
 		RPCcall('create_account', [register_form.elements[0].value, register_form.elements[1].value], register);
 	});
+    document.getElementById('teamButton').addEventListener('click', function()  {
+        RPCcall('team_info', [team_form.elements[0].value, "ci2qLTMLmrdQfYFrcjU4x1jNz0PN3ItK"], team);})
 	</script>
 </body>
 </html>
