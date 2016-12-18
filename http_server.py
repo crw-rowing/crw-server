@@ -32,6 +32,23 @@ class FileServer(BaseHTTPRequestHandler):
     redirects = {
         '': 'static/promo/index.html',
         'favicon.ico': 'static/favicon.ico',
+        'css/bootstrap.min.css' : 'static/promo/css/bootstrap.min.css',
+        'css/landing-page.css' : 'static/promo/css/landing-page.css',
+        'font-awesome/css/font-awesome.min.css' : 'static/promo/font-awesome/css/font-awesome.min.css',
+        'js/jquery.js' : 'static/promo/js/jquery.js',
+        'js/bootstrap.min.js' : 'static/promo/js/bootstrap.min.js',
+        'img/crw_logo_golf.png' : 'static/promo/img/crw_logo_golf.png',
+        'img/ipad.png' : 'static/promo/img/ipad.png',
+        'img/crw_laptop1.png' : 'static/promo/img/crw_laptop1.png',
+        'img/crwlogo-pc.png' : 'static/promo/img/crwlogo-pc.png',
+        'img/ruud_thumbnail.jpg' : 'static/promo/img/ruud_thumbnail.jpg',
+        'img/nikita_thumbnail.jpg' : 'static/promo/img/nikita_thumbnail.jpg',
+        'img/marien_thumbnail.jpg' : 'static/promo/img/marien_thumbnail.jpg',
+        'img/justin_thumbnail.jpg' : 'static/promo/img/justin_thumbnail.jpg',
+        'img/lotte_thumbnail.jpg' : 'static/promo/img/lotte_thumbnail.jpg',
+        'img/luuk_thumbnail.jpg' : 'static/promo/img/luuk_thumbnail.jpg',
+        'img/background_row_blue.jpg' : 'static/promo/img/background_row_blue.jpg',
+        'img/banner_coffee_blue.png' : 'static/promo/img/banner_coffee_blue.png'
     }
     server_version = "crw/{}".format(VERSION)
 
