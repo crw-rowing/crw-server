@@ -3,11 +3,43 @@ import jsonrpc
 import database as d
 
 
+# CrwJsonRpc is a server that accepts an extended version of JsonRpc
+# 2.0 requests, it supports the 'session' and 'user_id' values in the
+# request and those are required in any requests which need the user
+# to be logged in. CrwJsonRpc will return standard JsonRpc 2.0
+# responses.
 class CrwJsonRpc(JsonRpcServer):
     def __init__(self, database):
         self.udb = d.UserDatabase(database)
         self.tdb = d.TeamDatabase(database)
         self.sdb = d.SessionDatabase(database)
+
+        # The id of the user who's request is currently being processed
+        self.current_user_id = -1
+        # Stores whether the user is authenticated for the user id
+        # currently
+        self.authenticated = False
+
+    # We overwrite the rpc_invoke_single method to save our custom
+    # values before calling the rpc_invoke_single method from the
+    # super class.
+    def rpc_invoke_single(self, data):
+        if type(data) is dict:
+            if 'user_id' in data:
+                self.current_user_id = data['user_id']
+                if 'session' in data:
+                    # The user can only be authenticated if they
+                    # supply both an session key and user id (and they
+                    # are both correct).
+                    self.authenticated = self.sdb.verify_session_key(
+                        self.current_user_id, data['session'])
+
+        response = JsonRpcServer.rpc_invoke_single(self, data)
+
+        self.current_user_id = -1
+        self.authenticated = False
+
+        return response
 
     def echo(self, s):
         return s
@@ -31,35 +63,37 @@ class CrwJsonRpc(JsonRpcServer):
         return self.sdb.generate_session_key(
             self.udb.get_user_id(email))
 
-    def create_team(self, team_name, user_id, session_key):
+    def create_team(self, team_name):
         """Creates a team with the user of user_id as an coach.
         Returns the team_id of the created team."""
-        if not self.sdb.verify_session_key(user_id, session_key):
-            raise error_invalid_session_key
+        if not self.authenticated:
+            raise error_incorrect_authentication
 
-        return self.tdb.create_team(user_id, team_name)
+        return self.tdb.create_team(self.current_user_id, team_name)
 
-    def add_to_team(self, user_to_add_id, user_id, session_key):
+    def add_to_team(self, user_to_add_id):
         """Adds the user with user_to_add_id to the team that user_id
         is in."""
-        if not self.sdb.verify_session_key(user_id, session_key):
-            raise error_invalid_session_key
+        if not self.authenticated:
+            raise error_incorrect_authentication
 
-        (team_id, coach) = self.udb.get_user_team_status(user_id)
+        (team_id, coach) = self.udb.get_user_team_status(
+            self.current_user_id)
         if (team_id is None or coach is None or not coach):
             raise error_invalid_action_no_coach
 
-        self.tdb.add_user_to_team(user_id, user_to_add_id)
+        self.tdb.add_user_to_team(self.current_user_id, user_to_add_id)
 
         return True
 
-    def team_info(self, user_id, session_key):
+    def my_team_info(self):
         """Returns the team id, team name and members with user id,
-        email and coach status."""
-        if not self.sdb.verify_session_key(user_id, session_key):
-            raise error_invalid_session_key
+        email and coach status of the team the user is in."""
+        if not self.authenticated:
+            raise error_incorrect_authentication
 
-        (team_id, coach) = self.udb.get_user_team_status(user_id)
+        (team_id, coach) = self.udb.get_user_team_status(
+            self.current_user_id)
         if (team_id is None):
             raise error_user_is_not_in_a_team
 
@@ -73,8 +107,9 @@ error_account_already_exists = jsonrpc.RPCError(
     with this email""")
 error_invalid_account_credentials = jsonrpc.RPCError(
     2, """The provided credentials are incorrect""")
-error_invalid_session_key = jsonrpc.RPCError(
-    3, """The provided session key is incorrect or expired""")
+error_incorrect_authentication = jsonrpc.RPCError(
+    3, """The server was not able to authenticate the user, the
+    session or the user_id is missing or incorrect or expired.""")
 error_no_password_submitted = jsonrpc.RPCError(
     4, """No password is entered""")
 error_invalid_action_no_coach = jsonrpc.RPCError(
