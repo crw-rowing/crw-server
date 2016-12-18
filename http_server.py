@@ -5,11 +5,20 @@ import errno
 from crw import VERSION
 from crw_jsonrpc import CrwJsonRpc
 import database
+import ssl
 
 
 def serve(host, port, database_name, database_user):
     global httpd, database_object, rpc
     httpd = HTTPServer((host, port), FileServer)
+    httpd.socket = ssl.wrap_socket(
+        httpd.socket,
+        server_side=True,
+        # Replace with different paths if needed
+        certfile='/etc/letsencrypt/live/' +
+        'crw.demoprojecten.nl/cert.pem',
+        keyfile='/etc/letsencrypt/live/' +
+        'crw.demoprojecten.nl/privkey.pem')
     database_object = database.Database(database_name, database_user)
     rpc = CrwJsonRpc(database_object)
     try:
@@ -21,7 +30,7 @@ def serve(host, port, database_name, database_user):
 
 class FileServer(BaseHTTPRequestHandler):
     redirects = {
-        '': 'static/index.html',
+        '': 'static/promo/index.html',
         'favicon.ico': 'static/favicon.ico',
     }
     server_version = "crw/{}".format(VERSION)
