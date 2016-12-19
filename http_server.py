@@ -15,9 +15,9 @@ def serve(host, port, database_name, database_user):
         httpd.socket,
         server_side=True,
         # Replace with different paths if needed
-        certfile='/etc/letsencrypt/live/' +
+        certfile='/etc/letsencrypt/live/'
         'crw.demoprojecten.nl/cert.pem',
-        keyfile='/etc/letsencrypt/live/' +
+        keyfile='/etc/letsencrypt/live/'
         'crw.demoprojecten.nl/privkey.pem')
     database_object = database.Database(database_name, database_user)
     rpc = CrwJsonRpc(database_object)
