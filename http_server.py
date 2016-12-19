@@ -1,6 +1,7 @@
 from BaseHTTPServer import HTTPServer, BaseHTTPRequestHandler
 from mimetypes import guess_type
 from posixpath import normpath
+import os.path
 import errno
 from crw import VERSION
 from crw_jsonrpc import CrwJsonRpc
@@ -39,10 +40,10 @@ class FileServer(BaseHTTPRequestHandler):
         based on the request path.
         """
         fname = normpath(fname)
-        if fname.endswith('/'):
-            fname += 'index.html'
         if fname[0] == '/':
             fname = fname[1:]
+        if os.path.isdir(fname):
+            fname += '/index.html'
         return FileServer.redirects[fname] if fname in FileServer.redirects \
             else fname
 
