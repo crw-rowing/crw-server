@@ -30,7 +30,8 @@ def serve(host, port, database_name, database_user):
 
 class FileServer(BaseHTTPRequestHandler):
     redirects = {
-        '': 'promo/index.html',
+        '': 'index.html',
+        'promo': 'promo/index.html'
     }
     server_version = "crw/{}".format(VERSION)
 
