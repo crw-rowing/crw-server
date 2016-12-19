@@ -30,8 +30,6 @@ def serve(host, port, database_name, database_user):
 
 class FileServer(BaseHTTPRequestHandler):
     redirects = {
-        '': 'index.html',
-        'promo': 'promo/index.html'
     }
     server_version = "crw/{}".format(VERSION)
 
@@ -41,6 +39,8 @@ class FileServer(BaseHTTPRequestHandler):
         based on the request path.
         """
         fname = normpath(fname)
+        if fname.endswith('/'):
+            fname += 'index.html'
         if fname[0] == '/':
             fname = fname[1:]
         return FileServer.redirects[fname] if fname in FileServer.redirects \
