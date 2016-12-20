@@ -1,6 +1,7 @@
 from BaseHTTPServer import HTTPServer, BaseHTTPRequestHandler
 from mimetypes import guess_type
 from posixpath import normpath
+from urlparse import urlparse
 import os.path
 import errno
 from crw import VERSION
@@ -39,7 +40,8 @@ class FileServer(BaseHTTPRequestHandler):
         Gives the right filename to be read and sent to the client,
         based on the request path.
         """
-        fname = normpath(fname)
+        path = urlparse(fname).path
+        fname = normpath(path)
         if os.path.isdir('static' + fname):
             fname += '/index.html'
         if fname[0] == '/':
