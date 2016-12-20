@@ -27,7 +27,7 @@
 	<p id="register_status"></p>
    </form>
    <form id="team_form">
-        team_id:<br>
+        user_id:<br>
         <input type="text"/>
         <input type="button" id="teamButton" value="Team info">
    </form>
@@ -69,13 +69,13 @@
     }
 	
 	document.getElementById('loginButton').addEventListener('click', function() {
-		RPCcall('login', [login_form.elements[0].value, login_form.elements[1].value], session);
+		RPCcall('login', [login_form.elements[0].value, login_form.elements[1].value], null, null, session);
 	});
 	document.getElementById('registerButton').addEventListener('click', function() {
-		RPCcall('create_account', [register_form.elements[0].value, register_form.elements[1].value], register);
+		RPCcall('create_account', [register_form.elements[0].value, register_form.elements[1].value], null, null, register);
 	});
     document.getElementById('teamButton').addEventListener('click', function()  {
-        RPCcall('my_team_info', [team_form.elements[0].value, "ci2qLTMLmrdQfYFrcjU4x1jNz0PN3ItK"], team);})
+        RPCcall('my_team_info', [], team_form.elements[0].value, "ymFuRhcOSoA9cE7uoM9l1cyRmqmUQ3mK", team);})
 	</script>
 </body>
 </html>
