@@ -86,6 +86,20 @@ class CrwJsonRpc(JsonRpcServer):
 
         return True
 
+    def remove_from_team(self, user_to_remove_id):
+        """Removes the user with user_to_remove_id from the team that user_id
+        is in."""
+        if not self.authenticated:
+            raise error_incorrect_authentication
+        
+        try:
+            self.tdb.remove_user_from_team(self.current_user_id, user_to_remove_id)
+            return True
+        except d.UserDoesNotExistError, e:
+            raise error_user_does_not_exist
+        except d.ActionNotPermittedError, e:
+            raise error_invalid_action_no_coach
+        
     def my_team_info(self):
         """Returns the team id, team name and members with user id,
         email and coach status of the team the user is in."""
@@ -117,3 +131,5 @@ error_invalid_action_no_coach = jsonrpc.RPCError(
     this action""")
 error_user_is_not_in_a_team = jsonrpc.RPCError(
     6, """The user is not in a team""")
+error_user_does_not_exist = jsonrpc.RPCError(
+    7, """"No user with that user_id exists""")
