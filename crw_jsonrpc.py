@@ -91,15 +91,16 @@ class CrwJsonRpc(JsonRpcServer):
         is in."""
         if not self.authenticated:
             raise error_incorrect_authentication
-        
+
         try:
-            self.tdb.remove_user_from_team(self.current_user_id, user_to_remove_id)
+            self.tdb.remove_user_from_team(self.current_user_id,
+                                           user_to_remove_id)
             return True
         except d.UserDoesNotExistError, e:
             raise error_user_does_not_exist
         except d.ActionNotPermittedError, e:
             raise error_invalid_action_no_coach
-        
+
     def my_team_info(self):
         """Returns the team id, team name and members with user id,
         email and coach status of the team the user is in."""
