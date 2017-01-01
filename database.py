@@ -30,6 +30,10 @@ class Database:
             password TEXT,
             team_id INTEGER REFERENCES teams(id),
             coach BOOLEAN);""")
+        # We use an TIMESTAMP without time zone here, instead of with
+        # a timezone, so we assume that the server will be in the same
+        # timezone. More info on date types:
+        # https://www.postgresql.org/docs/8.0/static/datatype-datetime.html
         self.cursor.execute(
             """CREATE TABLE sessions
             (key TEXT PRIMARY KEY,
