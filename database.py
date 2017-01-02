@@ -38,8 +38,14 @@ class Database:
             """CREATE TABLE sessions
             (key TEXT PRIMARY KEY,
             user_id INTEGER REFERENCES users(id) NOT NULL,
-            exp_date TIMESTAMP NOT NULL);
-            """)
+            exp_date TIMESTAMP NOT NULL);""")
+        self.cursor.execute(
+            """CREATE TABLE health_data
+            (user_id INTEGER REFERENCES users(id) NOT NULL,
+            date DATE NOT NULL,
+            resting_heart_rate INTEGER NOT NULL,
+            weight INTEGER NOT NULL,
+            comment TEXT);""")
         self.database_connection.commit()
 
     def drop_all_tables(self):
@@ -50,6 +56,8 @@ class Database:
             """DROP TABLE users;""")
         self.cursor.execute(
             """DROP TABLE teams;""")
+        self.cursor.execute(
+            """DROP TABLE health_data;""")
         self.database_connection.commit()
 
     def close_database_connection(self):
