@@ -39,18 +39,38 @@ class DatabaseTest(u.TestCase):
     def populate_database(self):
         """Populates the database with the users saved in the USERS
         array, by calling self.db.add_user for each.
-        Also adds health data for 2017-01-01 for the first user."""
+        Also adds health data for the first user."""
         for user in self.USERS:
             self.udb.add_user(user[0], user[1])
 
         self.test_health_user_id = 1
-        self.test_health_date = datetime.date(2017, 1, 1)
+        self.test_health_date = datetime.date(2010, 1, 1)
         self.test_health_data = (80, 70, 'Feeling great today')
         self.hdb.add_health_data(self.test_health_user_id,
                                  self.test_health_date,
                                  self.test_health_data[0],
                                  self.test_health_data[1],
                                  self.test_health_data[2])
+
+        # Add three additional entries in the past week, with two in
+        # the past three days.
+        self.test_health_last_week_amm = 3
+        self.test_health_last_3_days_amm = 2
+
+        # Today
+        self.hdb.add_health_data(self.test_health_user_id,
+                                 datetime.date.today(),
+                                 0, 0, '')
+        # Three days ago
+        self.hdb.add_health_data(self.test_health_user_id,
+                                 datetime.date.today() -
+                                 datetime.timedelta(days=2),
+                                 0, 0, '')
+        # Seven days ago
+        self.hdb.add_health_data(self.test_health_user_id,
+                                 datetime.date.today() -
+                                 datetime.timedelta(days=7),
+                                 0, 0, '')
 
 
 class UserDatabaseTest(DatabaseTest):
@@ -395,6 +415,32 @@ class HealthDatabaseTest(DatabaseTest):
                           """Test that the correct data is retreived
                           from the health database.""")
 
+    def test_get_past_health_data_standard_period(self):
+        self.assertEquals(
+            len(self.hdb.get_past_health_data(self.test_health_user_id)),
+            self.test_health_last_week_amm,
+            """Test that the correct ammount of entries is retreived
+            for the past week""")
+
+    def test_get_past_health_data_short_period(self):
+        self.assertEquals(
+            len(self.hdb.get_past_health_data(self.test_health_user_id,
+                                              datetime.timedelta(days=3))),
+            self.test_health_last_3_days_amm,
+            """Test that the correct ammount of entries is retreived
+            for the past three days""")
+
+    def test_get_past_health_data_no_data(self):
+        self.assertEquals(
+            len(self.hdb.get_past_health_data(4)), 0,
+            """Test that no entries are retreived if the user doesn't
+            have any.""")
+
+    def test_get_past_health_data_no_user(self):
+        self.assertEquals(
+            len(self.hdb.get_past_health_data(-1)), 0,
+            """Test that no entries are retreived if the user doesn't
+            exist.""")
 
 if __name__ == '__main__':
     suite1 = u.TestLoader()\
