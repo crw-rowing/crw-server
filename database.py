@@ -53,11 +53,11 @@ class Database:
         self.cursor.execute(
             """DROP TABLE sessions;""")
         self.cursor.execute(
+            """DROP TABLE health_data;""")
+        self.cursor.execute(
             """DROP TABLE users;""")
         self.cursor.execute(
             """DROP TABLE teams;""")
-        self.cursor.execute(
-            """DROP TABLE health_data;""")
         self.database_connection.commit()
 
     def close_database_connection(self):
