@@ -423,3 +423,17 @@ class HealthDatabase:
             WHERE user_id = %s
             AND date = %s;""", (user_id, date))
         return self.d.cursor.fetchone()
+
+    def get_past_health_data(self, user_id,
+                             time=datetime.timedelta(days=7)):
+        """Returns a list of (date, resting_heart_rate, weight,
+        comment) tuples for all entries of the user with `user_id`
+        that have a date less than `time` ago."""
+        self.d.cursor.execute(
+            """SELECT date, resting_heart_rate, weight, comment
+            FROM health_data
+            WHERE user_id = %s
+            AND date >= %s;""",
+            (user_id, datetime.date.today() - time))
+
+        return self.d.cursor.fetchall()
