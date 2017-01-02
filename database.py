@@ -388,14 +388,9 @@ class HealthDatabase:
         if not udb.does_user_exist(user_id):
             raise UserDoesNotExistError('id', user_id)
 
-        # Attempt to get an entry for this date and user_id, so we
-        # know whether to update the existing entry, or insert a new
-        # one.
-        self.d.cursor.execute(
-            """SELECT * FROM health_data
-            WHERE user_id = %s
-            AND date = %s;""", (user_id, date))
-        already_exists = len(self.d.cursor.fetchall()) != 0
+        # get_healt_data returns None if no entry exist
+        already_exists = self.get_health_data(user_id, date)\
+                         is not None
 
         if already_exists:
             # Update the current entry
@@ -417,3 +412,15 @@ class HealthDatabase:
                 (user_id, date, resting_heart_rate, weight, comment))
 
         self.d.database_connection.commit()
+
+    def get_health_data(self, user_id, date):
+        """Returns the (resting_heart_rate, weight, comment) for the given
+        date and user_id.
+        If no entry is found, it returns None.
+        If multiple entries exist, it returns the first one gotten
+        with fetchone()."""
+        self.d.cursor.execute(
+            """SELECT resting_heart_rate, weight, comment FROM health_data
+            WHERE user_id = %s
+            AND date = %s;""", (user_id, date))
+        return self.d.cursor.fetchone()
