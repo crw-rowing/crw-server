@@ -389,8 +389,7 @@ class HealthDatabase:
             raise UserDoesNotExistError('id', user_id)
 
         # get_healt_data returns None if no entry exist
-        already_exists = self.get_health_data(user_id, date)\
-                         is not None
+        already_exists = self.get_health_data(user_id, date) is not None
 
         if already_exists:
             # Update the current entry

@@ -18,6 +18,7 @@ class DatabaseTest(u.TestCase):
         self.udb = d.UserDatabase(self.db)
         self.tdb = d.TeamDatabase(self.db)
         self.sdb = d.SessionDatabase(self.db)
+        self.hdb = d.HealthDatabase(self.db)
         self.USERS = [('kees@kmail.com', 'hunter4'),
                       ('a', 'b'),
                       ('', 'b'),
@@ -37,9 +38,19 @@ class DatabaseTest(u.TestCase):
 
     def populate_database(self):
         """Populates the database with the users saved in the USERS
-        array, by calling self.db.add_user for each."""
+        array, by calling self.db.add_user for each.
+        Also adds health data for 2017-01-01 for the first user."""
         for user in self.USERS:
             self.udb.add_user(user[0], user[1])
+
+        self.test_health_user_id = 1
+        self.test_health_date = datetime.date(2017, 1, 1)
+        self.test_health_data = (80, 70, 'Feeling great today')
+        self.hdb.add_health_data(self.test_health_user_id,
+                                 self.test_health_date,
+                                 self.test_health_data[0],
+                                 self.test_health_data[1],
+                                 self.test_health_data[2])
 
 
 class UserDatabaseTest(DatabaseTest):
@@ -334,6 +345,50 @@ class SessionDatabaseTest(DatabaseTest):
                          expired keys""")
 
 
+class HealthDatabaseTest(DatabaseTest):
+    def test_add_new_health_data(self):
+        user_id = 2
+        date = datetime.date(2016, 12, 31)
+        heart_rate = 900
+        weight = 80
+        comment = 'My heart rate is way too high!'
+        self.hdb.add_health_data(user_id, date, heart_rate, weight,
+                                 comment)
+        self.assertEquals(self.hdb.get_health_data(user_id, date),
+                          (heart_rate, weight, comment),
+                          """Test that the correct data is saved when
+                          adding a new entry.""")
+
+    def test_add_updating_health_data(self):
+        heart_rate = 900
+        weight = 80
+        comment = 'My heart rate is way too high!'
+        self.hdb.add_health_data(self.test_health_user_id,
+                                 self.test_health_date,
+                                 heart_rate, weight, comment)
+        self.assertEquals(self.hdb.get_health_data(
+            self.test_health_user_id, self.test_health_date),
+                          (heart_rate, weight, comment),
+                          """Test that the entry is correctly
+                          retreived after updating.""")
+
+        # Test that there is actually only one entry and not just the
+        # correct one is retreived.
+        self.hdb.d.cursor.execute(
+            """SELECT * FROM health_data
+            WHERE user_id = %s AND date = %s;""",
+            (self.test_health_user_id, self.test_health_date))
+        self.assertEquals(len(self.hdb.d.cursor.fetchall()), 1,
+                          """Test that there is only one entry
+                          matching the date and user after
+                          updating.""")
+
+    def test_add_health_data_no_user(self):
+        with self.assertRaises(d.UserDoesNotExistError) as e:
+            self.hdb.add_health_data(-1, datetime.date(1999, 12, 31),
+                                     10, 10, '')
+
+
 if __name__ == '__main__':
     suite1 = u.TestLoader()\
               .loadTestsFromTestCase(UserDatabaseTest)
@@ -341,5 +396,7 @@ if __name__ == '__main__':
               .loadTestsFromTestCase(TeamDatabaseTest)
     suite3 = u.TestLoader()\
               .loadTestsFromTestCase(SessionDatabaseTest)
-    suite = u.TestSuite([suite1, suite2, suite3])
+    suite4 = u.TestLoader()\
+              .loadTestsFromTestCase(HealthDatabaseTest)
+    suite = u.TestSuite([suite1, suite2, suite3, suite4])
     u.TextTestRunner(verbosity=2).run(suite)
