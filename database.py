@@ -368,3 +368,52 @@ class SessionDatabase:
                                     datetime.datetime.now()))
 
         self.d.database_connection.commit()
+
+
+class HealthDatabase:
+    def __init__(self, database):
+        self.d = database
+
+    def add_health_data(self, user_id, date, resting_heart_rate,
+                        weight, comment):
+        """Adds an health_data entry to the health_data table in the
+        database. If there already exists an entry for this user on
+        the same date, that entry is updated instead.
+
+        `date` should already be an datetime.date object.
+
+        Raises an UserDoesNotExistError if no user exists with the
+        user_id."""
+        udb = UserDatabase(self.d)
+        if not udb.does_user_exist(user_id):
+            raise UserDoesNotExistError('id', user_id)
+
+        # Attempt to get an entry for this date and user_id, so we
+        # know whether to update the existing entry, or insert a new
+        # one.
+        self.d.cursor.execute(
+            """SELECT * FROM health_data
+            WHERE user_id = %s
+            AND date = %s;""", (user_id, date))
+        already_exists = len(self.d.cursor.fetchall()) != 0
+
+        if already_exists:
+            # Update the current entry
+            self.d.cursor.execute(
+                """UPDATE health_data
+                SET resting_heart_rate = %s,
+                weight = %s,
+                comment = %s
+                WHERE user_id = %s
+                AND date = %s;""",
+                (resting_heart_rate, weight,
+                 comment, user_id, date))
+        else:
+            # Insert a new entry
+            self.d.cursor.execute(
+                """INSERT INTO health_data
+                (user_id, date, resting_heart_rate, weight, comment)
+                VALUES (%s, %s, %s, %s, %s);""",
+                (user_id, date, resting_heart_rate, weight, comment))
+
+        self.d.database_connection.commit()
