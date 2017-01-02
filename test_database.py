@@ -388,6 +388,13 @@ class HealthDatabaseTest(DatabaseTest):
             self.hdb.add_health_data(-1, datetime.date(1999, 12, 31),
                                      10, 10, '')
 
+    def test_get_health_data(self):
+        self.assertEquals(self.hdb.get_health_data(
+            self.test_health_user_id, self.test_health_date),
+                          self.test_health_data,
+                          """Test that the correct data is retreived
+                          from the health database.""")
+
 
 if __name__ == '__main__':
     suite1 = u.TestLoader()\
