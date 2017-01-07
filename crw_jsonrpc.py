@@ -1,6 +1,7 @@
 from jsonrpc import JsonRpcServer
 import jsonrpc
 import database as d
+import datetime
 
 
 # CrwJsonRpc is a server that accepts an extended version of JsonRpc
@@ -136,6 +137,19 @@ class CrwJsonRpc(JsonRpcServer):
             weight, comment)
 
         return True
+
+    def get_my_health_data(self, days_in_the_past):
+        """Gets the health data of the user from `days_in_the_past` ago to
+        now, in the form [(date, resting_heart_rate, weight,
+        comment)].
+
+        Days should be an int.
+        """
+        if not self.authenticated:
+            raise error_incorrect_authentication
+
+        return self.hdb.get_past_health_data(
+            self.current_user_id, datetime.timedelta(days=days_in_the_past))
 
 
 error_account_already_exists = jsonrpc.RPCError(
