@@ -13,6 +13,7 @@ class CrwJsonRpc(JsonRpcServer):
         self.udb = d.UserDatabase(database)
         self.tdb = d.TeamDatabase(database)
         self.sdb = d.SessionDatabase(database)
+        self.hdb = d.HealthDatabase(database)
 
         # The id of the user who's request is currently being processed
         self.current_user_id = -1
@@ -116,6 +117,26 @@ class CrwJsonRpc(JsonRpcServer):
         team_members = self.tdb.get_team_members(team_id)
         return [team_id, team_name] + team_members
 
+    def add_health_data(self, date, resting_heart_rate, weight, comment):
+        """Adds the health data of the logged in user to the health
+        database using HealthDatabase::add_health_data.
+
+        Returns true on success"""
+        if not self.authenticated:
+            raise error_incorrect_authentication
+
+        (team_id, coach) = self.udb.get_user_team_status(self.current_user_id)
+        if team_id is not None and coach:
+            # Someone who is a coach in a team, can't add any health
+            # data
+            raise error_invalid_action_coach
+
+        self.hdb.add_health_data(
+            self.current_user_id, date, resting_heart_rate,
+            weight, comment)
+
+        return True
+
 
 error_account_already_exists = jsonrpc.RPCError(
     1, """There is already an account associated
@@ -134,3 +155,6 @@ error_user_is_not_in_a_team = jsonrpc.RPCError(
     6, """The user is not in a team""")
 error_user_does_not_exist = jsonrpc.RPCError(
     7, """"No user with that user_id exists""")
+error_invalid_action_coach = jsonrpc.RPCError(
+    8, """The user is a coach in a team, so they can't perform
+    this action""")
