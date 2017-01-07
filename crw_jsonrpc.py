@@ -143,13 +143,46 @@ class CrwJsonRpc(JsonRpcServer):
         now, in the form [(date, resting_heart_rate, weight,
         comment)].
 
-        Days should be an int.
+        `days_in_the_past` should be an int.
         """
         if not self.authenticated:
             raise error_incorrect_authentication
 
         return self.hdb.get_past_health_data(
             self.current_user_id, datetime.timedelta(days=days_in_the_past))
+
+    def get_team_health_data(self, days_in_the_past):
+        """RPC to get the health data of their whole team. It returns
+        [(member_email, [(date, resting_heart_rate, weight, comment)])].
+
+        The user should be authenticated and a coach.
+
+        `days_in_the_past` should be an int."""
+        if not self.authenticated:
+            raise error_incorrect_authentication
+
+        (team_id, coach) = self.udb.get_user_team_status(self.current_user_id)
+        if not coach or team_id is None:
+            raise error_invalid_action_no_coach
+
+        # This is a list in the form [(user_id, email, coach)]
+        team_list = self.tdb.get_team_members(team_id)
+
+        team_health_data = []
+
+        for team_member in team_list:
+            coach = team_member[2]
+            if coach:
+                # Coaches don't have any health data and can be skipped
+                continue
+            email = team_member[1]
+            user_id = team_member[0]
+            team_health_data.append(
+                (email,
+                 self.hdb.get_past_health_data(
+                     user_id, datetime.timedelta(days=days_in_the_past))))
+
+        return team_health_data
 
 
 error_account_already_exists = jsonrpc.RPCError(
