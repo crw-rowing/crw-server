@@ -324,6 +324,56 @@ class CrwJsonRpcTest(u.TestCase):
                           """Test that the correct exception is raised
                           when an user isn't authencitated.""")
 
+    def populate_test_user_health(self, user_id):
+        self.date1 = datetime.date.today() - datetime.timedelta(days=2)
+        self.date2 = datetime.date.today() - datetime.timedelta(days=6)
+        self.heart_rate1 = 10
+        self.heart_rate2 = 20
+        self.set_user_and_authenticated(user_id)
+        self.rpc.add_health_data(self.date1, self.heart_rate1, 0, "test")
+        self.set_user_and_authenticated(user_id)
+        self.rpc.add_health_data(self.date2, self.heart_rate2, 0, "test")
+
+    def test_get_my_health_data_3_days(self):
+        user_id = 2
+        self.populate_test_user_health(2)
+
+        self.set_user_and_authenticated(user_id)
+        data = self.rpc.get_my_health_data(3)
+
+        self.assertEquals(len(data), 1,
+                          """Test that one health entry is found from
+                          three days in the past to now""")
+        self.assertEquals(data[0][1], self.heart_rate1)
+
+    def test_get_my_health_data_7_days(self):
+        user_id = 2
+        self.populate_test_user_health(2)
+
+        self.set_user_and_authenticated(user_id)
+        data = self.rpc.get_my_health_data(7)
+
+        self.assertEquals(len(data), 2,
+                          """Test that one health entry is found from
+                          three days in the past to now""")
+
+        for entry in data:
+            if entry[0] == self.date1:
+                self.assertEquals(entry[1], self.heart_rate1)
+            elif entry[0] == self.date2:
+                self.assertEquals(entry[1], self.heart_rate2)
+            else:
+                self.assertTrue(False, """The entry has an incorrect
+                date""")
+
+    def test_get_my_health_data_not_authenticated(self):
+        with self.assertRaises(jsonrpc.RPCError) as err:
+            self.rpc.get_my_health_data(7)
+
+        self.assertEquals(err.exception.code, 3,
+                          """Test that the correct exception is raised
+                          when an user isn't authencitated.""")
+
 
 if __name__ == '__main__':
     suite = u.TestLoader()\
