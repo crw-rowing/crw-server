@@ -4,6 +4,7 @@ import crw_jsonrpc as e
 import jsonrpc
 import json
 import string
+import datetime
 
 # Before testing, make an empty database named userdatabasetest and
 # create an file named test_database.properties with one line in the
@@ -20,6 +21,7 @@ class CrwJsonRpcTest(u.TestCase):
         self.db = d.Database(DATABASE, user)
         self.udb = d.UserDatabase(self.db)
         self.tdb = d.TeamDatabase(self.db)
+        self.hdb = d.HealthDatabase(self.db)
         self.USERS = [('kees@kmail.com', 'hunter4'),
                       ('a', 'b'),
                       ('', 'b'),
@@ -281,6 +283,46 @@ class CrwJsonRpcTest(u.TestCase):
         self.assertEquals(team_info[2][0], self.test_team_coach_id,
                           """Test that the first member returned is
                           the correct coach""")
+
+    def test_add_health_data_correct(self):
+        user_id = 2
+        date = datetime.date(2016, 12, 31)
+        heart_rate = 900
+        weight = 80
+        comment = 'My heart rate is way too high!'
+        self.set_user_and_authenticated(user_id)
+        self.rpc.add_health_data(date, heart_rate, weight, comment)
+        self.assertEquals(self.hdb.get_health_data(user_id, date),
+                          (heart_rate, weight, comment),
+                          """Test that the add_health_data RPC adds
+                          the data correctly""")
+
+    def test_add_health_data_coach(self):
+        user_id = self.test_team_coach_id
+        date = datetime.date(2016, 12, 31)
+        heart_rate = 900
+        weight = 80
+        comment = 'My heart rate is way too high!'
+        self.set_user_and_authenticated(user_id)
+        with self.assertRaises(jsonrpc.RPCError) as err:
+            self.rpc.add_health_data(date, heart_rate, weight, comment)
+
+        self.assertEquals(err.exception.code, 8,
+                          """Test that the correct exception is raised
+                          when an coach tries to add health data.""")
+
+    def test_add_health_data_not_authencitated(self):
+        user_id = 2
+        date = datetime.date(2016, 12, 31)
+        heart_rate = 900
+        weight = 80
+        comment = 'My heart rate is way too high!'
+        with self.assertRaises(jsonrpc.RPCError) as err:
+            self.rpc.add_health_data(date, heart_rate, weight, comment)
+
+        self.assertEquals(err.exception.code, 3,
+                          """Test that the correct exception is raised
+                          when an user isn't authencitated.""")
 
 
 if __name__ == '__main__':
