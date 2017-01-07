@@ -374,6 +374,46 @@ class CrwJsonRpcTest(u.TestCase):
                           """Test that the correct exception is raised
                           when an user isn't authencitated.""")
 
+    def test_get_team_health_data_correct(self):
+        user_id = 7
+        self.set_user_and_authenticated(self.test_team_coach_id)
+        self.rpc.add_to_team(user_id)
+        self.populate_test_user_health(user_id)
+
+        self.set_user_and_authenticated(self.test_team_coach_id)
+        team_health_data = self.rpc.get_team_health_data(3)
+
+        self.assertEquals(len(team_health_data), 1)
+
+        self.assertEquals(self.udb.get_user_id(team_health_data[0][0]),
+                          user_id,
+                          """Test that only health data from the
+                          correct user (not the coach) is returned.""")
+
+        self.assertEquals(team_health_data[0][1][0][1], self.heart_rate1)
+
+    def test_get_team_health_data_not_authenticated(self):
+        self.rpc.current_user_id = self.test_team_coach_id
+        with self.assertRaises(jsonrpc.RPCError) as err:
+            self.rpc.get_team_health_data(7)
+
+        self.assertEquals(err.exception.code, 3,
+                          """Test that the correct exception is raised
+                          when an user isn't authencitated.""")
+
+    def test_get_team_health_data_not_coach(self):
+        user_id = 7
+        self.set_user_and_authenticated(self.test_team_coach_id)
+        self.rpc.add_to_team(user_id)
+
+        self.set_user_and_authenticated(user_id)
+        with self.assertRaises(jsonrpc.RPCError) as err:
+            self.rpc.get_team_health_data(7)
+
+        self.assertEquals(err.exception.code, 5,
+                          """Test that the correct exception is raised
+                          when an user isn't a coach.""")
+
 
 if __name__ == '__main__':
     suite = u.TestLoader()\
