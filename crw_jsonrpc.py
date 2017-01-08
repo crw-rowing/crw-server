@@ -103,6 +103,37 @@ class CrwJsonRpc(JsonRpcServer):
         except d.ActionNotPermittedError, e:
             raise error_invalid_action_no_coach
 
+    def set_coach_status(self, user_to_change, coach):
+        """Changes the coach property of the user with user_id `user_to_change`
+        to `coach`. It can only be used by a coach of a team on a member of
+        that same team. It can not be used to change the last coach of a team
+        to a regular member.
+
+        This can be used to remove coach status from the user him or
+        herself."""
+        if not self.authenticated:
+            raise error_incorrect_authentication
+
+        (team_id, caller_coach) = self.udb.get_user_team_status(
+            self.current_user_id)
+        if not caller_coach or team_id is None:
+            raise error_invalid_action_no_coach
+
+        coaches_in_team =\
+            len([member for member in
+                 self.tdb.get_team_members(team_id)
+                 if member[2]])
+
+        if coaches_in_team == 1 and user_to_change == self.current_user_id \
+           and not coach:
+            # This RPC call is attempting to remove the only coach that is left
+            # in this team, which is not allowed.
+            raise error_invalid_action_last_coach
+
+        self.tdb.set_user_coach_status(user_to_change, coach)
+
+        return True
+
     def my_team_info(self):
         """Returns the team id, team name and members with user id,
         email and coach status of the team the user is in."""
@@ -205,3 +236,5 @@ error_user_does_not_exist = jsonrpc.RPCError(
 error_invalid_action_coach = jsonrpc.RPCError(
     8, """The user is a coach in a team, so they can't perform
     this action""")
+error_invalid_action_last_coach = jsonrpc.RPCError(
+    9, """Removing the last coach is a team is not allowed""")
