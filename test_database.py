@@ -300,6 +300,30 @@ class TeamDatabaseTest(DatabaseTest):
         with self.assertRaises(ValueError) as e:
             self.tdb.get_team_members(-1)
 
+    def test_set_user_coach_status_to_coach(self):
+        team_id = self.create_team_for_user_1()
+        self.tdb.add_user_to_team(1, 2)
+        self.tdb.set_user_coach_status(2, True)
+
+        self.assertTrue(self.udb.get_user_team_status(2)[1],
+                        """Test that the user is correctly marked as a
+                        coach""")
+
+    def test_set_user_coach_status_to_not_coach(self):
+        team_id = self.create_team_for_user_1()
+        self.tdb.add_user_to_team(1, 2)
+        self.tdb.set_user_coach_status(2, True)
+
+        self.tdb.set_user_coach_status(1, False)
+
+        self.assertFalse(self.udb.get_user_team_status(1)[1],
+                         """Test that the user is correctly marked not
+                         coach.""")
+
+    def test_set_user_coach_status_no_user(self):
+        with self.assertRaises(d.UserDoesNotExistError) as e:
+            self.tdb.set_user_coach_status(-1, True)
+
 
 class SessionDatabaseTest(DatabaseTest):
     def test_generate_correct_session_key(self):
