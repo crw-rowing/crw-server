@@ -247,6 +247,20 @@ class TeamDatabase:
 
         self.d.database_connection.commit()
 
+    def set_user_coach_status(self, user_to_change_id, coach):
+        """Changes the coach status of the user with
+        user_id=`user_to_change_id` to `coach`."""
+        udb = UserDatabase(self.d)
+        if not udb.does_user_exist(user_to_change_id):
+            raise UserDoesNotExistError('id', user_to_change_id)
+
+        self.d.cursor.execute(
+            """UPDATE users
+            SET coach = %s
+            WHERE id = %s;""", (coach, user_to_change_id))
+
+        self.d.database_connection.commit()
+
     def remove_user_from_team(
             self, requesting_user_id, user_to_remove_id):
         """Removes a user from the team it is in. Either the
