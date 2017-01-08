@@ -414,6 +414,55 @@ class CrwJsonRpcTest(u.TestCase):
                           """Test that the correct exception is raised
                           when an user isn't a coach.""")
 
+    def test_set_coach_status_correct_to_coach(self):
+        user_id = 7
+        self.tdb.add_user_to_team(self.test_team_coach_id, user_id)
+
+        self.set_user_and_authenticated(self.test_team_coach_id)
+        self.rpc.set_coach_status(user_id, True)
+
+        self.assertTrue(self.udb.get_user_team_status(user_id)[1],
+                        """Test that the user is correctly marked a
+                        coach""")
+
+    def test_set_coach_status_correct_to_not_coach(self):
+        user_id = 7
+        self.tdb.add_user_to_team(self.test_team_coach_id, user_id)
+
+        self.set_user_and_authenticated(self.test_team_coach_id)
+        self.rpc.set_coach_status(user_id, True)
+
+        self.set_user_and_authenticated(user_id)
+        self.rpc.set_coach_status(self.test_team_coach_id, False)
+
+        self.assertFalse(self.udb.get_user_team_status
+                         (self.test_team_coach_id)[1],
+                         """Test that the user is correctly marked not
+                         a coach""")
+
+    def test_set_coach_status_not_authenticated(self):
+        self.rpc.current_user_id = self.test_team_coach_id
+
+        with self.assertRaises(jsonrpc.RPCError) as err:
+            self.rpc.set_coach_status(self.test_team_coach_id, True)
+
+        self.assertEquals(err.exception.code, 3,
+                          """Test that the correct exception is raised
+                          when an user isn't authencitated.""")
+
+    def test_set_coach_status_remove_last_coach(self):
+        user_id = 7
+        self.tdb.add_user_to_team(self.test_team_coach_id, user_id)
+
+        self.set_user_and_authenticated(self.test_team_coach_id)
+        with self.assertRaises(jsonrpc.RPCError) as err:
+            self.rpc.set_coach_status(self.test_team_coach_id, False)
+
+        self.assertEquals(err.exception.code, 9,
+                          """Test that the correct exception is raised
+                          when an coach tries to remove himself as the
+                          last coach.""")
+
 
 if __name__ == '__main__':
     suite = u.TestLoader()\
