@@ -19,6 +19,7 @@ class DatabaseTest(u.TestCase):
         self.tdb = d.TeamDatabase(self.db)
         self.sdb = d.SessionDatabase(self.db)
         self.hdb = d.HealthDatabase(self.db)
+        self.trdb = d.TrainingDatabase(self.db)
         self.USERS = [('kees@kmail.com', 'hunter4'),
                       ('a', 'b'),
                       ('', 'b'),
@@ -466,6 +467,12 @@ class HealthDatabaseTest(DatabaseTest):
             """Test that no entries are retreived if the user doesn't
             exist.""")
 
+class TrainingDatabaseTest(DatabaseTest):
+    def test_add_training_no_user(self):
+        with self.assertRaises(d.UserDoesNotExistError) as e:
+            self.trdb.add_training(-1, True, "My training")
+    
+
 if __name__ == '__main__':
     suite1 = u.TestLoader()\
               .loadTestsFromTestCase(UserDatabaseTest)
@@ -475,5 +482,7 @@ if __name__ == '__main__':
               .loadTestsFromTestCase(SessionDatabaseTest)
     suite4 = u.TestLoader()\
               .loadTestsFromTestCase(HealthDatabaseTest)
-    suite = u.TestSuite([suite1, suite2, suite3, suite4])
+    suite5 = u.TestLoader()\
+              .loadTestsFromTestCase(TrainingDatabaseTest)
+    suite = u.TestSuite([suite1, suite2, suite3, suite4, suite5])
     u.TextTestRunner(verbosity=2).run(suite)
