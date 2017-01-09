@@ -22,7 +22,7 @@ class Database:
         self.cursor.execute(
             """CREATE TABLE teams
             (id INTEGER PRIMARY KEY,
-            name TEXT NOT NULL)""")
+            name TEXT NOT NULL);""")
         self.cursor.execute(
             """CREATE TABLE users
             (id INTEGER PRIMARY KEY,
@@ -46,6 +46,20 @@ class Database:
             resting_heart_rate INTEGER NOT NULL,
             weight INTEGER NOT NULL,
             comment TEXT);""")
+        self.cursor.execute(
+            """CREATE TABLE training_data
+            (id INTEGER PRIMARY KEY,
+            user_id INTEGER REFERENCES users(id) NOT NULL,
+            time TIMESTAMP NOT NULL,
+            type_is_ed BOOLEAN NOT NULL,
+            comment TEXT);""")
+        self.cursor.execute(
+            """CREATE TABLE interval_data
+            (training_id INTEGER REFERENCES training_data(id) NOT NULL,
+            duration INTEGER NOT NULL,
+            power INTEGER NOT NULL,
+            pace INTEGER,
+            rest INTERVAL);""")
         self.database_connection.commit()
 
     def drop_all_tables(self):
