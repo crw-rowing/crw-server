@@ -95,7 +95,13 @@ class PasswordFieldEmpty(ValueError):
         super(PasswordFieldEmpty, self).__init__(
             'No password submitted')
 
+            
+class TrainingDoesNotExistError(ValueError):
+    def __init__(self, training_id):
+        super(TrainingDoesNotExistError, self).__init__(
+            'No training with training_id={} exists'.format(training_id))
 
+            
 class ActionNotPermittedError(ValueError):
     def __init__(self, who, what):
         super(ActionNotPermittedError, self).__init__(
@@ -401,6 +407,17 @@ class SessionDatabase:
 
         self.d.database_connection.commit()
 
+    def get_user_id_by_sessionkey(self, session_key):
+        """Returns the user_id associated with this session key"""
+        self.d.cursor.execute(
+            """SELECT user_id FROM sessions
+            WHERE key = %s;""", (session_key,))
+            
+        saved_id_tuple = self.d.cursor.fetchone()
+        if saved_id_tuple is None:
+            return None
+        
+        return saved_id_tuple[0]
 
 class HealthDatabase:
     def __init__(self, database):
@@ -475,9 +492,9 @@ class TrainingDatabase:
     def __init__(self, database):
         self.d = database
     
-    def add_training(self, user_id, type_is_ed, comment):
+    def add_training(self, user_id, time, type_is_ed, comment):
         """Adds an training entry to the training_data table in the
-        database. 
+        database. Returns the training_id
         
         Raises an UserDoesNotExistError if no user exists with the
         user_id."""
@@ -499,7 +516,67 @@ class TrainingDatabase:
             """INSERT INTO training_data
             (id, user_id, time, type_is_ed, comment)
             VALUES (%s, %s, %s, %s, %s);""",
-            (training_id, user_id, datetime.datetime.now(),
+            (training_id, user_id, time,
              type_is_ed, comment))
         
         self.d.database_connection.commit()
+        
+        return training_id
+    
+    def add_interval(self, training_id, duration, power, pace, rest):
+        """Adds interval entry in interval database that belongs to
+        given training_id. With duration in seconds. If pace is 0
+        it will be stored as NULL""" 
+        
+        if not self.does_training_exist(training_id):
+            raise TrainingDoesNotExistError(training_id)
+        
+        if pace == 0:
+            pace = None
+        
+        self.d.cursor.execute(
+            """INSERT INTO interval_data
+            (training_id, duration, power, pace, rest)
+            VALUES (%s, %s, %s, %s, %s);""",
+            (training_id, duration, power, pace, rest))
+        
+        self.d.database_connection.commit()
+        
+    def get_past_training_data(self, user_id, 
+                          time=datetime.timedelta(days=7)):
+        """Returns a list of (training_id, time, type_is_ed,
+        comment) tuples for all entries of the user with `user_id`
+        that have a date less than `time` ago. 
+        """
+        
+        self.d.cursor.execute(
+            """SELECT id, time, type_is_ed, comment 
+            FROM training_data
+            WHERE user_id = %s
+            AND time >= %s;""", 
+            (user_id, datetime.datetime.now() - time))
+        
+        return self.d.cursor.fetchall()
+        
+    def get_training_interval_data(self, training_id):
+        
+        if not self.does_training_exist(training_id):
+            raise TrainingDoesNotExistError(training_id)
+        
+        self.d.cursor.execute(
+            """SELECT duration, power, pace, rest
+            FROM interval_data
+            WHERE training_id = %s;""",(training_id,))
+        
+        return self.d.cursor.fetchall()    
+        
+    def does_training_exist(self, training_id):
+        """"Checks if an training exists with the given training_id."""
+        
+        self.d.cursor.execute(
+            """SELECT id FROM training_data
+            WHERE id = %s;""", (training_id,))
+        
+        return (self.d.cursor.fetchone() is not None)
+        
+        
