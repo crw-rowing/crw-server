@@ -69,6 +69,10 @@ class Database:
         self.cursor.execute(
             """DROP TABLE health_data;""")
         self.cursor.execute(
+            """DROP TABLE interval_data;""")
+        self.cursor.execute(
+            """DROP TABLE training_data;""")
+        self.cursor.execute(
             """DROP TABLE users;""")
         self.cursor.execute(
             """DROP TABLE teams;""")
@@ -465,3 +469,37 @@ class HealthDatabase:
             (user_id, datetime.date.today() - time))
 
         return self.d.cursor.fetchall()
+
+        
+class TrainingDatabase:
+    def __init__(self, database):
+        self.d = database
+    
+    def add_training(self, user_id, type_is_ed, comment):
+        """Adds an training entry to the training_data table in the
+        database. 
+        
+        Raises an UserDoesNotExistError if no user exists with the
+        user_id."""
+        
+        udb = UserDatabase(self.d)
+        if not udb.does_user_exist(user_id):
+            raise UserDoesNotExistError('id', user_id)
+        
+        # Find the max training id, so we can choose one that is one
+        # higher
+        self.d.cursor.execute(
+            """SELECT MAX(id) FROM training_data;""")
+        (max_training_id,) = self.d.cursor.fetchone()
+        if max_training_id is None:
+            max_training_id = 0
+        training_id = max_training_id + 1
+        
+        self.d.cursor.execute(
+            """INSERT INTO training_data
+            (id, user_id, time, type_is_ed, comment)
+            VALUES (%s, %s, %s, %s, %s);""",
+            (training_id, user_id, datetime.datetime.now(),
+             type_is_ed, comment))
+        
+        self.d.database_connection.commit()
