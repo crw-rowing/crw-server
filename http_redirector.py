@@ -12,10 +12,11 @@
 from socket import *
 from select import *
 
-HOST = 'crw.demoprojecten.nl'
-PORT = 80
-TARGET = "https://crw.demoprojecten.nl"
+from crw import USE_REDIRECTOR, HOST, PORT, REDIRECT_TARGET as TARGET
 
+if not USE_REDIRECTOR:
+    print 'HTTPS redirector disabled in configuration.'
+    exit()
 
 class Connection:
     """

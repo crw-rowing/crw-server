@@ -4,24 +4,24 @@ from posixpath import normpath
 from urlparse import urlparse
 import os.path
 import errno
-from crw import VERSION
+import crw
 from crw_jsonrpc import CrwJsonRpc
 import database
 import ssl
 
 
-def serve(host, port, database_name, database_user):
+def serve():
     global httpd, database_object, rpc
-    httpd = HTTPServer((host, port), FileServer)
-    httpd.socket = ssl.wrap_socket(
-        httpd.socket,
-        server_side=True,
-        # Replace with different paths if needed
-        certfile='/etc/letsencrypt/live/'
-        'crw.demoprojecten.nl/cert.pem',
-        keyfile='/etc/letsencrypt/live/'
-        'crw.demoprojecten.nl/privkey.pem')
-    database_object = database.Database(database_name, database_user)
+    httpd = HTTPServer((crw.HOST, crw.PORT), FileServer)
+    if crw.USE_HTTPS:
+        httpd.socket = ssl.wrap_socket(
+            httpd.socket,
+            server_side=True,
+            # Replace with different paths if needed
+            certfile=crw.HTTPS_CERT,
+            keyfile=crw.HTTPS_KEY)
+    database_object = database.Database(
+        crw.DATABASE_NAME, crw.DATABASE_USER, crw.DATABASE_PASS)
     rpc = CrwJsonRpc(database_object)
     try:
         httpd.serve_forever()
@@ -33,7 +33,7 @@ def serve(host, port, database_name, database_user):
 class FileServer(BaseHTTPRequestHandler):
     redirects = {
     }
-    server_version = "crw/{}".format(VERSION)
+    server_version = "crw/{}".format(crw.VERSION)
 
     def resolve_filename(self, fname):
         """
