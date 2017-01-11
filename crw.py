@@ -1,12 +1,26 @@
-VERSION = '0.1'
+import ConfigParser
 
-HOST = ''
-PORT = 4443  # User 443 on the actual server (requires root)
-# Requires a database named 'crw-database' owned by the user root,
-# or you can change these to select another database.
-DATABASE = 'crw-database'
-DATABASE_USER = 'root'
+VERSION = '0.1'
+CONFIG_FILE = 'crw.cfg'
+
+cfg = ConfigParser.ConfigParser()
+cfg.read(CONFIG_FILE)
+
+HOST = cfg.get('http', 'host')
+PORT = int(cfg.get('http', 'port'))
+
+USE_HTTPS = cfg.get('https', 'enabled') == 'True'
+HTTPS_PORT = cfg.get('https', 'port')
+HTTPS_CERT = cfg.get('https', 'certfile')
+HTTPS_KEY = cfg.get('https', 'keyfile')
+
+DATABASE_NAME = cfg.get('database', 'name')
+DATABASE_USER = cfg.get('database', 'user')
+DATABASE_PASS = cfg.get('database', 'password')
+
+USE_REDIRECTOR = cfg.get('redirector', 'enabled') == 'True'
+REDIRECT_TARGET = cfg.get('redirector', 'target')
 
 if __name__ == '__main__':
     import http_server
-    http_server.serve(HOST, PORT, DATABASE, DATABASE_USER)
+    http_server.serve()

@@ -12,9 +12,10 @@ pwd_context = CryptContext(
 
 
 class Database:
-    def __init__(self, database_name, database_user):
+    def __init__(self, database_name, database_user, database_pass):
         self.database_connection = psycopg2.connect(database=database_name,
-                                                    user=database_user)
+                                                    user=database_user,
+                                                    password=database_pass)
         self.cursor = self.database_connection.cursor()
 
     def init_database(self):
