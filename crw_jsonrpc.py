@@ -54,6 +54,8 @@ class CrwJsonRpc(JsonRpcServer):
             raise error_no_password_submitted
         except d.UserDoesNotExistError, e:
             raise error_account_already_exists
+        except ValueError, e:
+            raise error_invalid_email_address
 
     def login(self, email, password):
         """This function will verify the user and return a new session
@@ -238,3 +240,5 @@ error_invalid_action_coach = jsonrpc.RPCError(
     this action""")
 error_invalid_action_last_coach = jsonrpc.RPCError(
     9, """Removing the last coach is a team is not allowed""")
+error_invalid_email_address = jsonrpc.RPCError(
+    10, """The given email address is synthactically invalid.""")

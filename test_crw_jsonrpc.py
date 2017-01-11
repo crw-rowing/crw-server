@@ -23,11 +23,11 @@ class CrwJsonRpcTest(u.TestCase):
         self.tdb = d.TeamDatabase(self.db)
         self.hdb = d.HealthDatabase(self.db)
         self.USERS = [('kees@kmail.com', 'hunter4'),
-                      ('a', 'b'),
-                      ('', 'b'),
-                      ('ab', 'dfd'),
-                      ('a\';DROP TABLE users; -- ',
-                       'a\';DROP TABLE users; -- '),
+                      ('adfd@bdfds.nl', 'b'),
+                      ('b+a@b.b.b.nl', 'b'),
+                      ('abldf@blldfds.dfdf', 'dfd'),
+                      ('fds@fd.a\';DROP TABLE users; -- ',
+                       'ds\';DROP TABLE users; -- '),
                       ('henk@email.com', 'phenk'),
                       ('kees@email.com', 'pkees'),
                       ('jan@email.com', 'pjan'),
@@ -114,6 +114,14 @@ class CrwJsonRpcTest(u.TestCase):
                                  """Test that creating a duplicate
                                  account returns a
                                  error_account_already_exists.""")
+
+    def test_create_account_invalid_email(self):
+        with self.assertRaises(jsonrpc.RPCError) as err:
+            self.rpc.create_account("geen email", "test")
+
+        self.assertEquals(err.exception.code, 10,
+                          """Test that the correct exception is raised
+                          when an invalid email is given.""")
 
     def assert_result_equals(self, response, expected_result, message):
         """Asserts that a result exists in the response and that the

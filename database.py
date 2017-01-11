@@ -3,6 +3,7 @@ from passlib.context import CryptContext
 import random
 import string
 import datetime
+import re
 
 # Global password context
 pwd_context = CryptContext(
@@ -120,6 +121,17 @@ class UserDatabase:
         # Check if password is not empty
         if password == "":
             raise PasswordFieldEmpty()
+
+        # Check if the email address is syntactically valid using a
+        # simple regex. NOTE: this allows some invalid, but disallows
+        # some theoretically valid email addresses. For example,
+        # example@example,com is theoretically a valid email adress,
+        # but isn't used on the internet (notice the comma). This
+        # regular expression was taken from
+        # http://stackoverflow.com/a/8022584
+        if not re.match(r'[^@]+@[^@]+\.[^@]+', email):
+            raise ValueError('The email address is invalid')
+
         # Check if there isn't already an user with this email address
         self.d.cursor.execute(
             """SELECT email FROM users

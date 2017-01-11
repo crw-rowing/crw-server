@@ -21,11 +21,11 @@ class DatabaseTest(u.TestCase):
         self.hdb = d.HealthDatabase(self.db)
         self.trdb = d.TrainingDatabase(self.db)
         self.USERS = [('kees@kmail.com', 'hunter4'),
-                      ('a', 'b'),
-                      ('', 'b'),
-                      ('ab', 'dfd'),
-                      ('a\';DROP TABLE users; -- ',
-                       'a\';DROP TABLE users; -- '),
+                      ('adfd@bdfds.nl', 'b'),
+                      ('b+a@b.b.b.nl', 'b'),
+                      ('abldf@blldfds.dfdf', 'dfd'),
+                      ('fds@fd.a\';DROP TABLE users; -- ',
+                       'ds\';DROP TABLE users; -- '),
                       ('henk@email.com', 'phenk'),
                       ('kees@email.com', 'pkees'),
                       ('jan@email.com', 'pjan'),
@@ -102,6 +102,12 @@ class UserDatabaseTest(DatabaseTest):
         """Test that adding a duplicate user raises a ValueError"""
         with self.assertRaises(ValueError) as a:
             self.udb.add_user('kees@kmail.com', 'hunter5')
+
+    def test_add_user_invalid_email(self):
+        """Test that adding an user with an invalid email raises a
+        ValueError."""
+        with self.assertRaises(ValueError) as a:
+            self.udb.add_user('this isn\'t an email address', 'hunter5')
 
     def test_get_correct_user_id(self):
         self.assertNotEqual(
