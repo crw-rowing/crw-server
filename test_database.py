@@ -473,11 +473,13 @@ class HealthDatabaseTest(DatabaseTest):
             """Test that no entries are retreived if the user doesn't
             exist.""")
 
+
 class TrainingDatabaseTest(DatabaseTest):
     def test_add_training_no_user(self):
         with self.assertRaises(d.UserDoesNotExistError) as e:
-            self.trdb.add_training(-1, datetime.datetime.now(), True, "My training")
-    
+            self.trdb.add_training(-1, datetime.datetime.now(), True,
+                                   "My training")
+
     def test_add_new_training_data(self):
         user_id = 1
         training_id = 1
@@ -506,19 +508,19 @@ class TrainingDatabaseTest(DatabaseTest):
                           (duration, power, pace, rest),
                           """Test that the correct data is saved when
                           adding a new entry.""")
-    
+
     def test_get_past_training_data_no_data(self):
         self.assertEquals(
             len(self.trdb.get_past_training_data(4)), 0,
             """Test that no entries are retreived if the user doesn't
             have any.""")
-    
+
     def test_get_past_training_data_no_user(self):
         self.assertEquals(
             len(self.trdb.get_past_training_data(-1)), 0,
             """Test that no entries are retreived if the user doesn't
             exist.""")
-                        
+
 if __name__ == '__main__':
     suite1 = u.TestLoader()\
               .loadTestsFromTestCase(UserDatabaseTest)

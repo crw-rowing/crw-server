@@ -245,7 +245,7 @@ class CrwJsonRpcTest(u.TestCase):
 
     def test_add_correct_to_team(self):
         self.set_user_and_authenticated(self.test_team_coach_id)
-        self.rpc.add_to_team(3)
+        self.rpc.add_to_team(self.USERS[2][0])
 
         (team_id, coach) = self.udb.get_user_team_status(3)
         self.assertEquals(team_id, self.test_team_id,
@@ -259,7 +259,7 @@ class CrwJsonRpcTest(u.TestCase):
     def test_add_to_team_not_authenticated(self):
         self.set_user_and_authenticated(3, False)
         with self.assertRaises(jsonrpc.RPCError) as err:
-            self.rpc.add_to_team(3)
+            self.rpc.add_to_team(self.USERS[2][0])
 
         self.assertEquals(err.exception.code, 3,
                           """Test that the correct exception is raised
@@ -268,16 +268,26 @@ class CrwJsonRpcTest(u.TestCase):
 
     def test_add_to_team_not_coach(self):
         self.set_user_and_authenticated(self.test_team_coach_id)
-        self.rpc.add_to_team(3)
+        self.rpc.add_to_team(self.USERS[2][0])
 
         with self.assertRaises(jsonrpc.RPCError) as err:
             self.set_user_and_authenticated(3)
-            self.rpc.add_to_team(4)
+            self.rpc.add_to_team(self.USERS[3][0])
 
         self.assertEquals(err.exception.code, 5,
                           """Test that the correct exception is raised
                           when a user who isn't a coach attempts to
                           add someone to his team.""")
+
+    def test_add_to_team_invalid_email(self):
+        with self.assertRaises(jsonrpc.RPCError) as err:
+            self.set_user_and_authenticated(self.test_team_coach_id)
+            self.rpc.add_to_team('nouserhasthis@email.com')
+
+        self.assertEquals(err.exception.code, 7,
+                          """Test that the correct exception is raised
+                          when an user tries to add an invalid email
+                          to a team.""")
 
     def test_my_team_info_correct(self):
         self.set_user_and_authenticated(self.test_team_coach_id)
@@ -385,7 +395,7 @@ class CrwJsonRpcTest(u.TestCase):
     def test_get_team_health_data_correct(self):
         user_id = 7
         self.set_user_and_authenticated(self.test_team_coach_id)
-        self.rpc.add_to_team(user_id)
+        self.rpc.add_to_team(self.USERS[user_id - 1][0])
         self.populate_test_user_health(user_id)
 
         self.set_user_and_authenticated(self.test_team_coach_id)
@@ -412,7 +422,7 @@ class CrwJsonRpcTest(u.TestCase):
     def test_get_team_health_data_not_coach(self):
         user_id = 7
         self.set_user_and_authenticated(self.test_team_coach_id)
-        self.rpc.add_to_team(user_id)
+        self.rpc.add_to_team(self.USERS[user_id - 1][0])
 
         self.set_user_and_authenticated(user_id)
         with self.assertRaises(jsonrpc.RPCError) as err:

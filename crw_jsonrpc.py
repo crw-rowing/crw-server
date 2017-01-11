@@ -75,8 +75,8 @@ class CrwJsonRpc(JsonRpcServer):
 
         return self.tdb.create_team(self.current_user_id, team_name)
 
-    def add_to_team(self, user_to_add_id):
-        """Adds the user with user_to_add_id to the team that user_id
+    def add_to_team(self, user_to_add_email):
+        """Adds the user with user_to_add_email to the team that the user
         is in."""
         if not self.authenticated:
             raise error_incorrect_authentication
@@ -85,6 +85,11 @@ class CrwJsonRpc(JsonRpcServer):
             self.current_user_id)
         if (team_id is None or coach is None or not coach):
             raise error_invalid_action_no_coach
+
+        try:
+            user_to_add_id = self.udb.get_user_id(user_to_add_email)
+        except d.UserDoesNotExistError:
+            raise error_user_does_not_exist
 
         self.tdb.add_user_to_team(self.current_user_id, user_to_add_id)
 
@@ -234,7 +239,7 @@ error_invalid_action_no_coach = jsonrpc.RPCError(
 error_user_is_not_in_a_team = jsonrpc.RPCError(
     6, """The user is not in a team""")
 error_user_does_not_exist = jsonrpc.RPCError(
-    7, """"No user with that user_id exists""")
+    7, """"No user with that value exists""")
 error_invalid_action_coach = jsonrpc.RPCError(
     8, """The user is a coach in a team, so they can't perform
     this action""")
