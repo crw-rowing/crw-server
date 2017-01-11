@@ -22,9 +22,5 @@ USE_REDIRECTOR = cfg.get('redirector', 'enabled') == 'True'
 REDIRECT_TARGET = cfg.get('redirector', 'target')
 
 if __name__ == '__main__':
-    # Save again just in case
-    with open(CONFIG_FILE, 'wb') as f:
-        cfg.write(f)
-
     import http_server
     http_server.serve()
