@@ -1,4 +1,5 @@
 import ConfigParser
+import thread
 
 VERSION = '0.1'
 CONFIG_FILE = 'crw.cfg'
@@ -22,5 +23,11 @@ USE_REDIRECTOR = cfg.get('redirector', 'enabled') == 'True'
 REDIRECT_TARGET = cfg.get('redirector', 'target')
 
 if __name__ == '__main__':
-    import http_server
-    http_server.serve()
+    try:
+        import http_redirector
+        thread.start_new_thread(http_redirector.serve, ())
+        import http_server
+        http_server.serve()
+    except KeyboardInterrupt:
+        print 'Exiting...'
+        raise SystemExit

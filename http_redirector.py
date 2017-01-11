@@ -14,9 +14,6 @@ from select import *
 
 from crw import USE_REDIRECTOR, HOST, PORT, REDIRECT_TARGET as TARGET
 
-if not USE_REDIRECTOR:
-    print 'HTTPS redirector disabled in configuration.'
-    exit()
 
 class Connection:
     """
@@ -76,6 +73,12 @@ class ConnectionHandler:
             # kick em out
             conn.socket.close
 
-connections = ConnectionHandler()
-while 1:
-    connections.run()
+def serve():
+    if not USE_REDIRECTOR:
+        print 'HTTPS redirector disabled in configuration.'
+        return
+
+    print 'HTTPS redirector running'
+    connections = ConnectionHandler()
+    while 1:
+        connections.run()
