@@ -577,13 +577,13 @@ class CrwJsonRpcTest(u.TestCase):
 
         self.set_user_and_authenticated(user_id)
         self.rpc.add_training(self.time1, self.type_is_ed, self.comment,
-            self.interval_list)
+                              self.interval_list)
         self.set_user_and_authenticated(user_id)
         self.rpc.add_training(self.time2, self.type_is_ed, self.comment,
-            self.interval_list)
+                              self.interval_list)
         self.set_user_and_authenticated(user_id)
         self.rpc.add_training(self.time3, self.type_is_ed, self.comment,
-            self.interval_list)
+                              self.interval_list)
 
     def test_get_my_training_data_3_days(self):
         user_id = 3
