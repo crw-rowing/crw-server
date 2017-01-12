@@ -71,7 +71,7 @@ class CrwJsonRpc(JsonRpcServer):
     def logged_in(self):
         """Returns if the user is still aunthencitated"""
         return self.authencitated
-         
+
     def create_team(self, team_name):
         """Creates a team with the user of user_id as an coach.
         Returns the team_id of the created team."""
@@ -237,30 +237,30 @@ class CrwJsonRpc(JsonRpcServer):
 
     def add_training(self, time, type_is_ed, comment, interval_list):
         """Adds a new training for the user with associated interval(s) supplied
-        in the interval_list. interval_list must be in the form 
+        in the interval_list. interval_list must be in the form
         [(duration, power, pace, rest)] with rest as datetime.timedelta object.
-        
+
         Returns true on success"""
-        
-        if not self.authenticate
+
+        if not self.authenticated:
             raise error_incorrect_authentication
-            
+
         (team_id, coach) = self.udb.get_user_team_status(self.current_user_id)
         if team_id is not None and coach:
             # Someone who is a coach in a team, can't add any training
             # data
             raise error_invalid_action_coach
-            
+
         training_id = self.trdb.add_training(
             self.current_user_id, time, type_is_ed, comment)
-        
+
         for interval in interval_list:
             duration = interval[0]
             power = interval[1]
             pace = interval[2]
             rest = interval[3]
             self.trdb.add_interval(training_id, duration, power, pace, rest)
-        
+
         return True
 
 error_account_already_exists = jsonrpc.RPCError(
