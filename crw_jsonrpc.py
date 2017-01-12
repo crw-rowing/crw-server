@@ -268,11 +268,11 @@ class CrwJsonRpc(JsonRpcServer):
         to now, in the form
         [(time, type_is_ed, comment[(duration, power, pace, rest)])] """
         
-        if not self.authenticate
+        if not self.authenticated:
             raise error_incorrect_authentication
         
         #This list is in the form [(training_id, time, type_is_ed, comment)]
-        past_trainings = self.trdb.get_past_health_data(self.current_user_id,
+        past_trainings = self.trdb.get_past_training_data(self.current_user_id,
             datetime.timedelta(days=days_in_the_past))
         
         training_data = []
