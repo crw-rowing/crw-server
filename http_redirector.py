@@ -73,6 +73,7 @@ class ConnectionHandler:
             # kick em out
             conn.socket.close
 
+
 def serve():
     if not USE_REDIRECTOR:
         print 'HTTPS redirector disabled in configuration.'
