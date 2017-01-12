@@ -23,6 +23,7 @@ class CrwJsonRpcTest(u.TestCase):
         self.udb = d.UserDatabase(self.db)
         self.tdb = d.TeamDatabase(self.db)
         self.hdb = d.HealthDatabase(self.db)
+        self.trdb = d.TrainingDatabase(self.db)
         self.USERS = [('kees@kmail.com', 'hunter4'),
                       ('adfd@bdfds.nl', 'b'),
                       ('b+a@b.b.b.nl', 'b'),
@@ -539,6 +540,33 @@ class CrwJsonRpcTest(u.TestCase):
         self.assertEquals(err.exception.code, 5,
                           """Test that the correct exception is raised
                           when an user isn't a coach.""")
+
+    def test_add_training_correct(self):
+        user_id = 1
+        time = datetime.datetime.now()
+        type_is_ed = True
+        comment = 'My training'
+        interval_list = [(200, 120, 10, datetime.timedelta(minutes=10)),
+                         (180, 180, 90, datetime.timedelta(seconds=30))]
+
+        self.set_user_and_authenticated(user_id)
+        self.rpc.add_training(time, type_is_ed, comment, interval_list)
+
+        [(training_id, f_time, f_type, f_comment)] =\
+            self.trdb.get_past_training_data(user_id)
+
+        self.assertEquals(f_time, time)
+        self.assertEquals(f_type, type_is_ed)
+        self.assertEquals(f_comment, comment)
+
+        [interval_1, interval_2] = self.trdb\
+                                       .get_training_interval_data(training_id)
+
+        for interval in interval_list:
+            self.assertTrue(interval == interval_1 or
+                            interval == interval_2)
+
+        self.assertFalse(interval_1 == interval_2)
 
 
 if __name__ == '__main__':
