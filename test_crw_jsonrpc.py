@@ -437,7 +437,7 @@ class CrwJsonRpcTest(u.TestCase):
         self.tdb.add_user_to_team(self.test_team_coach_id, user_id)
 
         self.set_user_and_authenticated(self.test_team_coach_id)
-        self.rpc.set_coach_status(user_id, True)
+        self.rpc.set_coach_status(self.USERS[user_id - 1][0], True)
 
         self.assertTrue(self.udb.get_user_team_status(user_id)[1],
                         """Test that the user is correctly marked a
@@ -448,10 +448,11 @@ class CrwJsonRpcTest(u.TestCase):
         self.tdb.add_user_to_team(self.test_team_coach_id, user_id)
 
         self.set_user_and_authenticated(self.test_team_coach_id)
-        self.rpc.set_coach_status(user_id, True)
+        self.rpc.set_coach_status(self.USERS[user_id - 1][0], True)
 
         self.set_user_and_authenticated(user_id)
-        self.rpc.set_coach_status(self.test_team_coach_id, False)
+        self.rpc.set_coach_status(
+            self.USERS[self.test_team_coach_id - 1][0], False)
 
         self.assertFalse(self.udb.get_user_team_status
                          (self.test_team_coach_id)[1],
@@ -462,7 +463,8 @@ class CrwJsonRpcTest(u.TestCase):
         self.rpc.current_user_id = self.test_team_coach_id
 
         with self.assertRaises(jsonrpc.RPCError) as err:
-            self.rpc.set_coach_status(self.test_team_coach_id, True)
+            self.rpc.set_coach_status(
+                self.USERS[self.test_team_coach_id - 1][0], True)
 
         self.assertEquals(err.exception.code, 3,
                           """Test that the correct exception is raised
@@ -474,12 +476,23 @@ class CrwJsonRpcTest(u.TestCase):
 
         self.set_user_and_authenticated(self.test_team_coach_id)
         with self.assertRaises(jsonrpc.RPCError) as err:
-            self.rpc.set_coach_status(self.test_team_coach_id, False)
+            self.rpc.set_coach_status(
+                self.USERS[self.test_team_coach_id - 1][0], False)
 
         self.assertEquals(err.exception.code, 9,
                           """Test that the correct exception is raised
                           when an coach tries to remove himself as the
                           last coach.""")
+
+    def test_set_coach_status_non_existing_email(self):
+        self.set_user_and_authenticated(self.test_team_coach_id)
+        with self.assertRaises(jsonrpc.RPCError) as err:
+            self.rpc.set_coach_status('nietbestaand@email.com', False)
+
+        self.assertEquals(err.exception.code, 7,
+                          """Test that the correct exception is raised when the
+                          coach status is set of an non existing email
+                          user.""")
 
     def test_remove_from_team_correct(self):
         user_id = 7
