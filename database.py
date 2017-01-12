@@ -592,3 +592,19 @@ class TrainingDatabase:
             WHERE id = %s;""", (training_id,))
 
         return (self.d.cursor.fetchone() is not None)
+
+    def remove_training(self, training_id):
+        
+        
+        if not self.does_training_exist(training_id):
+            raise TrainingDoesNotExistError(training_id)
+        
+        self.d.cursor.execute(
+            """DELETE FROM interval_data
+            WHERE training_id = %s;""",(training_id,))
+        
+        self.d.cursor.execute(
+            """DELETE FROM training_data
+            WHERE training_id = %s;""",(training_id,))
+        
+        self.d.database_connection.commit()
