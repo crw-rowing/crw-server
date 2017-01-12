@@ -111,14 +111,16 @@ class CrwJsonRpc(JsonRpcServer):
         except d.ActionNotPermittedError, e:
             raise error_invalid_action_no_coach
 
-    def set_coach_status(self, user_to_change, coach):
-        """Changes the coach property of the user with user_id `user_to_change`
-        to `coach`. It can only be used by a coach of a team on a member of
-        that same team. It can not be used to change the last coach of a team
-        to a regular member.
+    def set_coach_status(self, user_to_change_email, coach):
+        """Changes the coach property of the user with the email
+        `user_to_change_email` to `coach`. It can only be used by a
+        coach of a team on a member of that same team. It can not be
+        used to change the last coach of a team to a regular member.
 
         This can be used to remove coach status from the user him or
-        herself."""
+        herself.
+
+        """
         if not self.authenticated:
             raise error_incorrect_authentication
 
@@ -131,6 +133,11 @@ class CrwJsonRpc(JsonRpcServer):
             len([member for member in
                  self.tdb.get_team_members(team_id)
                  if member[2]])
+
+        try:
+            user_to_change = self.udb.get_user_id(user_to_change_email)
+        except d.UserDoesNotExistError, e:
+            raise error_user_does_not_exist
 
         if coaches_in_team == 1 and user_to_change == self.current_user_id \
            and not coach:
