@@ -236,8 +236,8 @@ class CrwJsonRpc(JsonRpcServer):
         return team_health_data
 
     def add_training(self, time, type_is_ed, comment, interval_list):
-        """Adds a new training for the user with associated interval(s) supplied
-        in the interval_list. interval_list must be in the form 
+        """Adds a new training for the user with associated interval(s)
+        supplied in the interval_list. interval_list must be in the form 
         [(duration, power, pace, rest)] with rest as datetime.timedelta object.
         
         Returns true on success"""
@@ -262,7 +262,33 @@ class CrwJsonRpc(JsonRpcServer):
             self.trdb.add_interval(training_id, duration, power, pace, rest)
         
         return True
-
+    
+    def get_my_training_data(self, days_in_the_past):
+        """Returns training data with interval data from days_in_the_past
+        to now, in the form
+        [(time, type_is_ed, comment[(duration, power, pace, rest)])] """
+        
+        if not self.authenticate
+            raise error_incorrect_authentication
+        
+        #This list is in the form [(training_id, time, type_is_ed, comment)]
+        past_trainings = self.trdb.get_past_health_data(self.current_user_id,
+            datetime.timedelta(days=days_in_the_past))
+        
+        training_data = []
+        
+        for training in past_trainings:
+            training_id = training[0]
+            time = training[1]
+            type_is_ed = training[2]
+            comment = training[3]
+            #This list is in the form [(duration, power, pace, rest)]
+            interval_data = self.trdb.get_training_interval_data(training_id)
+            training_data.append((time, type_is_ed, comment, interval_data))
+        
+        return training_data
+        
+        
 error_account_already_exists = jsonrpc.RPCError(
     1, """There is already an account associated
     with this email""")
