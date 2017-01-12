@@ -15,6 +15,8 @@ HTTPS_PORT = cfg.get('https', 'port')
 HTTPS_CERT = cfg.get('https', 'certfile')
 HTTPS_KEY = cfg.get('https', 'keyfile')
 
+DATABASE_HOST = cfg.get('database', 'host')
+DATABASE_PORT = cfg.get('database', 'port')
 DATABASE_NAME = cfg.get('database', 'name')
 DATABASE_USER = cfg.get('database', 'user')
 DATABASE_PASS = cfg.get('database', 'password')

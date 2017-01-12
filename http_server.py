@@ -21,7 +21,8 @@ def serve():
             certfile=crw.HTTPS_CERT,
             keyfile=crw.HTTPS_KEY)
     database_object = database.Database(
-        crw.DATABASE_NAME, crw.DATABASE_USER, crw.DATABASE_PASS)
+        crw.DATABASE_HOST, crw.DATABASE_PORT, crw.DATABASE_NAME,
+        crw.DATABASE_USER, crw.DATABASE_PASS)
     rpc = CrwJsonRpc(database_object)
     try:
         httpd.serve_forever()
