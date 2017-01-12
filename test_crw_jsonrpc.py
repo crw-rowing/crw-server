@@ -18,7 +18,7 @@ print 'Testing with database ' + DATABASE + ' with the user ' + user
 
 class CrwJsonRpcTest(u.TestCase):
     def setUp(self):
-        self.db = d.Database(DATABASE, user)
+        self.db = d.Database(DATABASE, user, '')
         self.udb = d.UserDatabase(self.db)
         self.tdb = d.TeamDatabase(self.db)
         self.hdb = d.HealthDatabase(self.db)

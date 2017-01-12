@@ -14,7 +14,7 @@ print 'Testing with database ' + DATABASE + ' with the user ' + user
 
 class DatabaseTest(u.TestCase):
     def setUp(self):
-        self.db = d.Database(DATABASE, user)
+        self.db = d.Database(DATABASE, user, '')
         self.udb = d.UserDatabase(self.db)
         self.tdb = d.TeamDatabase(self.db)
         self.sdb = d.SessionDatabase(self.db)
