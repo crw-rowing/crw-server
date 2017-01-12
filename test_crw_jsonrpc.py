@@ -5,6 +5,7 @@ import jsonrpc
 import json
 import string
 import datetime
+from crw import DATABASE_HOST, DATABASE_PORT
 
 # Before testing, make an empty database named userdatabasetest and
 # create an file named test_database.properties with one line in the
@@ -18,7 +19,7 @@ print 'Testing with database ' + DATABASE + ' with the user ' + user
 
 class CrwJsonRpcTest(u.TestCase):
     def setUp(self):
-        self.db = d.Database(DATABASE, user, '')
+        self.db = d.Database(DATABASE_HOST, DATABASE_PORT, DATABASE, user, '')
         self.udb = d.UserDatabase(self.db)
         self.tdb = d.TeamDatabase(self.db)
         self.hdb = d.HealthDatabase(self.db)
