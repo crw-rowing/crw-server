@@ -95,13 +95,14 @@ class CrwJsonRpc(JsonRpcServer):
 
         return True
 
-    def remove_from_team(self, user_to_remove_id):
-        """Removes the user with user_to_remove_id from the team that user_id
+    def remove_from_team(self, user_to_remove_email):
+        """Removes the user with user_to_remove_email from the team that the user
         is in."""
         if not self.authenticated:
             raise error_incorrect_authentication
 
         try:
+            user_to_remove_id = self.udb.get_user_id(user_to_remove_email)
             self.tdb.remove_user_from_team(self.current_user_id,
                                            user_to_remove_id)
             return True
