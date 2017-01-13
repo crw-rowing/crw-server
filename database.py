@@ -586,9 +586,23 @@ class TrainingDatabase:
 
     def does_training_exist(self, training_id):
         """"Checks if an training exists with the given training_id."""
-
         self.d.cursor.execute(
             """SELECT id FROM training_data
             WHERE id = %s;""", (training_id,))
 
         return (self.d.cursor.fetchone() is not None)
+
+    def remove_training(self, training_id):
+        """Removes a training rom the database."""
+        if not self.does_training_exist(training_id):
+            raise TrainingDoesNotExistError(training_id)
+
+        self.d.cursor.execute(
+            """DELETE FROM interval_data
+            WHERE training_id = %s;""", (training_id,))
+
+        self.d.cursor.execute(
+            """DELETE FROM training_data
+            WHERE training_id = %s;""", (training_id,))
+
+        self.d.database_connection.commit()

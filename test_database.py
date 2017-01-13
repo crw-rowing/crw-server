@@ -1,6 +1,7 @@
 import unittest as u
 import database as d
 import datetime
+from crw import DATABASE_HOST, DATABASE_PORT
 
 # Before testing, make an empty database named userdatabasetest and
 # create an file named test_database.properties with one line in the
@@ -14,7 +15,7 @@ print 'Testing with database ' + DATABASE + ' with the user ' + user
 
 class DatabaseTest(u.TestCase):
     def setUp(self):
-        self.db = d.Database(DATABASE, user, '')
+        self.db = d.Database(DATABASE_HOST, DATABASE_PORT, DATABASE, user, '')
         self.udb = d.UserDatabase(self.db)
         self.tdb = d.TeamDatabase(self.db)
         self.sdb = d.SessionDatabase(self.db)
