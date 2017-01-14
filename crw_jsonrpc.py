@@ -266,7 +266,7 @@ class CrwJsonRpc(JsonRpcServer):
     def get_my_training_data(self, days_in_the_past):
         """Returns training data with interval data from days_in_the_past
         to now, in the form
-        [(time, type_is_ed, comment[(duration, power, pace, rest)])] """
+        [(time, type_is_ed, comment, [(duration, power, pace, rest)])] """
 
         if not self.authenticated:
             raise error_incorrect_authentication
@@ -288,6 +288,57 @@ class CrwJsonRpc(JsonRpcServer):
             training_data.append((time, type_is_ed, comment, interval_data))
 
         return training_data
+
+    def get_team_training_data(self, days_in_the_past):
+        """RPC to get the training data of their whole team with the interval
+        data. It returns:
+        [(member_email,
+            [(time, type_is_ed, comment,
+                [(duration, power, pace, rest)]
+             )]
+         )]
+
+        The user should be authenticated and a coach.
+
+        `days_in_the_past` should be an int.
+        """
+        if not self.authenticated:
+            raise error_incorrect_authentication
+
+        (team_id, coach) = self.udb.get_user_team_status(self.current_user_id)
+        if not coach or team_id is None:
+            raise error_invalid_action_no_coach
+
+        # This is a list in the form [(user_id, email, coach)]
+        team_list = self.tdb.get_team_members(team_id)
+
+        team_training_data = []
+
+        for (user_id, email, coach) in team_list:
+            if coach:
+                # Choaches don't have any training data, they just
+                # watch it.
+                continue
+
+            past_trainings = self.trdb.get_past_training_data(
+                user_id, datetime.timedelta(days=days_in_the_past))
+
+            member_training_data = []
+
+            for training in past_trainings:
+                training_id = training[0]
+                time = training[1]
+                type_is_ed = training[2]
+                comment = training[3]
+                # This list is in the form [(duration, power, pace, rest)]
+                interval_data = self.trdb.get_training_interval_data(
+                    training_id)
+                member_training_data.append(
+                    (time, type_is_ed, comment, interval_data))
+
+            team_training_data.append((email, member_training_data))
+
+        return team_training_data
 
 
 error_account_already_exists = jsonrpc.RPCError(
