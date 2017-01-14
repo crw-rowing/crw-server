@@ -537,25 +537,6 @@ class TrainingDatabase:
 
         return training_id
 
-    def add_interval(self, training_id, duration, power, pace, rest):
-        """Adds interval entry in interval database that belongs to
-        given training_id. With duration in seconds. If pace is 0
-        it will be stored as NULL"""
-
-        if not self.does_training_exist(training_id):
-            raise TrainingDoesNotExistError(training_id)
-
-        if pace == 0:
-            pace = None
-
-        self.d.cursor.execute(
-            """INSERT INTO interval_data
-            (training_id, duration, power, pace, rest)
-            VALUES (%s, %s, %s, %s, %s);""",
-            (training_id, duration, power, pace, rest))
-
-        self.d.database_connection.commit()
-
     def get_past_training_data(self, user_id,
                                time=datetime.timedelta(days=7)):
         """Returns a list of (training_id, time, type_is_ed,
@@ -569,18 +550,6 @@ class TrainingDatabase:
             WHERE user_id = %s
             AND time >= %s;""",
             (user_id, datetime.datetime.now() - time))
-
-        return self.d.cursor.fetchall()
-
-    def get_training_interval_data(self, training_id):
-
-        if not self.does_training_exist(training_id):
-            raise TrainingDoesNotExistError(training_id)
-
-        self.d.cursor.execute(
-            """SELECT duration, power, pace, rest
-            FROM interval_data
-            WHERE training_id = %s;""", (training_id,))
 
         return self.d.cursor.fetchall()
 
@@ -606,3 +575,38 @@ class TrainingDatabase:
             WHERE training_id = %s;""", (training_id,))
 
         self.d.database_connection.commit()
+
+class IntervalDatabase:
+	def __init__(self, database):
+		self.d = database
+		
+	def add_interval(self, training_id, duration, power, pace, rest):
+    """Adds interval entry in interval database that belongs to
+    given training_id. With duration in seconds. If pace is 0
+    it will be stored as NULL"""
+
+    if not self.does_training_exist(training_id):
+        raise TrainingDoesNotExistError(training_id)
+
+    if pace == 0:
+        pace = None
+
+    self.d.cursor.execute(
+        """INSERT INTO interval_data
+        (training_id, duration, power, pace, rest)
+        VALUES (%s, %s, %s, %s, %s);""",
+        (training_id, duration, power, pace, rest))
+
+    self.d.database_connection.commit()
+	
+    def get_training_interval_data(self, training_id):
+
+        if not self.does_training_exist(training_id):
+            raise TrainingDoesNotExistError(training_id)
+
+        self.d.cursor.execute(
+            """SELECT duration, power, pace, rest
+            FROM interval_data
+            WHERE training_id = %s;""", (training_id,))
+
+        return self.d.cursor.fetchall()
