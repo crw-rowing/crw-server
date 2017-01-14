@@ -28,12 +28,22 @@ class CrwJsonRpc(JsonRpcServer):
     # super class.
     def rpc_invoke_single(self, data):
         if type(data) is dict:
-            if 'user_id' in data:
-                self.current_user_id = data['user_id']
-                if 'session' in data:
-                    # The user can only be authenticated if they
-                    # supply both an session key and user id (and they
-                    # are both correct).
+            if 'session' in data:
+                # The user can be authenticated if they
+                # supply both an session key and user id (and they
+                # are both correct).
+                # Or if they supply a correct session_key. The user_id
+                # that belongs to that session_key will be used then.
+                if 'user_id' in data and data['user_id'] is not None:
+                    self.current_user_id = data['user_id']
+                else:
+                    self.current_user_id =\
+                        self.sdb.get_user_id_by_sessionkey(
+                            data['session'])
+
+                if self.current_user_id is None:
+                    self.current_user_id = -1
+                else:
                     self.authenticated = self.sdb.verify_session_key(
                         self.current_user_id, data['session'])
 
