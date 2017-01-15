@@ -1,4 +1,5 @@
 import json
+import datetime
 
 
 class JsonRpcServer:
@@ -77,7 +78,21 @@ class JsonRpcServer:
         except RPCError as e:
             response['error'] = e.serialize()
         finally:
-            return None if response is None else json.dumps(response)
+            return None if response is None else json.dumps(
+                response, cls=DateTimeEncoder)
+
+
+class DateTimeEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, datetime.datetime):
+            return obj.isoformat()
+        elif isinstance(obj, datetime.date):
+            return obj.isoformat()
+        elif isinstance(obj, datetime.timedelta):
+            return (datetime.datetime.min + obj).time().isoformat()
+        elif isinstance(obj, datetime.date):
+            return obj.isoformat()
+        return json.JSONEncoder.default(self, obj)         
 
 
 class RPCError(Exception):
