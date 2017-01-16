@@ -529,7 +529,7 @@ class IntervalDatabaseTest(DatabaseTest):
         """Test that it gives an error when
         the training does not exists."""
         with self.assertRaises(d.UserDoesNotExistError) as e:
-             self.trdb.add_training(
+            self.trdb.add_training(
                 -1, datetime.date(1999, 12, 31),
                 10, 10)
 

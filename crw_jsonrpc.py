@@ -313,6 +313,7 @@ class CrwJsonRpc(JsonRpcServer):
 
         `days_in_the_past` should be an int.
         """
+
         if not self.authenticated:
             raise error_incorrect_authentication
 
