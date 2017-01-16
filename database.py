@@ -585,7 +585,8 @@ class IntervalDatabase:
     given training_id. With duration in seconds. If pace is 0
     it will be stored as NULL"""
 
-    if not self.does_training_exist(training_id):
+    trdb = TrainingDatabase(self.d)
+    if not trdb.does_training_exist(training_id):
         raise TrainingDoesNotExistError(training_id)
 
     if pace == 0:
@@ -600,8 +601,11 @@ class IntervalDatabase:
     self.d.database_connection.commit()
 	
     def get_training_interval_data(self, training_id):
-
-        if not self.does_training_exist(training_id):
+    """Returns a list of (duration, power, pace, rest) 
+    tuples for all entries of the training with `training_id`
+    """
+        trdb = TrainingDatabase(self.d)
+        if not trdb.does_training_exist(training_id):
             raise TrainingDoesNotExistError(training_id)
 
         self.d.cursor.execute(

@@ -16,6 +16,7 @@ class CrwJsonRpc(JsonRpcServer):
         self.sdb = d.SessionDatabase(database)
         self.hdb = d.HealthDatabase(database)
         self.trdb = d.TrainingDatabase(database)
+        self.idb = d.IntervalDatabase(database)
 
         # The id of the user who's request is currently being processed
         self.current_user_id = -1
@@ -269,7 +270,7 @@ class CrwJsonRpc(JsonRpcServer):
             power = interval[1]
             pace = interval[2]
             rest = interval[3]
-            self.trdb.add_interval(training_id, duration, power, pace, rest)
+            self.idb.add_interval(training_id, duration, power, pace, rest)
 
         return True
 
@@ -294,7 +295,7 @@ class CrwJsonRpc(JsonRpcServer):
             type_is_ed = training[2]
             comment = training[3]
             # This list is in the form [(duration, power, pace, rest)]
-            interval_data = self.trdb.get_training_interval_data(training_id)
+            interval_data = self.idb.get_training_interval_data(training_id)
             training_data.append((time, type_is_ed, comment, interval_data))
 
         return training_data
@@ -341,7 +342,7 @@ class CrwJsonRpc(JsonRpcServer):
                 type_is_ed = training[2]
                 comment = training[3]
                 # This list is in the form [(duration, power, pace, rest)]
-                interval_data = self.trdb.get_training_interval_data(
+                interval_data = self.idb.get_training_interval_data(
                     training_id)
                 member_training_data.append(
                     (time, type_is_ed, comment, interval_data))
