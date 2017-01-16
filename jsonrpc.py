@@ -83,54 +83,54 @@ class JsonRpcServer:
                 response, cls=DateTimeEncoder)
 
 
-#Methods to encode and decode datetime objects found at 
-#http://taketwoprogramming.blogspot.nl/2009/06/
-#subclassing-jsonencoder-and-jsondecoder.html
+# Methods to encode and decode datetime objects found at
+# http://taketwoprogramming.blogspot.nl/2009/06/
+# subclassing-jsonencoder-and-jsondecoder.html
 class DateTimeEncoder(json.JSONEncoder):
-    """ 
+    """
     Converts a python object, where datetime, date and timedelta objects
     are convertedinto objects that can be decoded using the DateTimeDecoder.
     """
     def default(self, obj):
         if isinstance(obj, datetime.datetime):
             return {
-                '__type__' : 'datetime',
-                'year' : obj.year,
-                'month' : obj.month,
-                'day' : obj.day,
-                'hour' : obj.hour,
-                'minute' : obj.minute,
-                'second' : obj.second,
-                'microsecond' : obj.microsecond,
-            }   
+                '__type__': 'datetime',
+                'year': obj.year,
+                'month': obj.month,
+                'day': obj.day,
+                'hour': obj.hour,
+                'minute': obj.minute,
+                'second': obj.second,
+                'microsecond': obj.microsecond,
+            }
 
         elif isinstance(obj, datetime.timedelta):
             return {
-                '__type__' : 'timedelta',
-                'days' : obj.days,
-                'seconds' : obj.seconds,
-                'microseconds' : obj.microseconds,
-            }   
+                '__type__': 'timedelta',
+                'days': obj.days,
+                'seconds': obj.seconds,
+                'microseconds': obj.microseconds,
+            }
         elif isinstance(obj, datetime.date):
             return {
-                '__type__' : 'date',
-                'year' : obj.year,
-                'month' : obj.month,
-                'day' : obj.day
+                '__type__': 'date',
+                'year': obj.year,
+                'month': obj.month,
+                'day': obj.day
             }
         else:
-            return JSONEncoder.default(self, obj)        
+            return JSONEncoder.default(self, obj)
 
 
 class DateTimeDecoder(json.JSONDecoder):
-    """ 
+    """
     Converts a json string, where datetime and timedelta objects were
-    converted into objects using the DateTimeEncoder, 
+    converted into objects using the DateTimeEncoder,
     back into a python object.
     """
 
     @staticmethod
-    def dict_to_object(dict): 
+    def dict_to_object(dict):
         if '__type__' not in dict:
             return dict
 

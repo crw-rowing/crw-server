@@ -576,10 +576,11 @@ class TrainingDatabase:
 
         self.d.database_connection.commit()
 
+
 class IntervalDatabase:
     def __init__(self, database):
         self.d = database
-    
+
     def add_interval(self, training_id, duration, power, pace, rest):
         """Adds interval entry in interval database that belongs to
         given training_id. With duration in seconds. If pace is 0
@@ -599,9 +600,9 @@ class IntervalDatabase:
             (training_id, duration, power, pace, rest))
 
         self.d.database_connection.commit()
-    
+
     def get_training_interval_data(self, training_id):
-        """Returns a list of (duration, power, pace, rest) 
+        """Returns a list of (duration, power, pace, rest)
         tuples for all entries of the training with `training_id`
         """
         trdb = TrainingDatabase(self.d)

@@ -22,6 +22,7 @@ class CrwJsonRpcTest(u.TestCase):
         self.tdb = d.TeamDatabase(self.db)
         self.hdb = d.HealthDatabase(self.db)
         self.trdb = d.TrainingDatabase(self.db)
+        self.idb = d.IntervalDatabase(self.db)
         self.USERS = [('kees@kmail.com', 'hunter4'),
                       ('adfd@bdfds.nl', 'b'),
                       ('b+a@b.b.b.nl', 'b'),
@@ -557,7 +558,7 @@ class CrwJsonRpcTest(u.TestCase):
         self.assertEquals(f_type, type_is_ed)
         self.assertEquals(f_comment, comment)
 
-        [interval_1, interval_2] = self.trdb\
+        [interval_1, interval_2] = self.idb\
                                        .get_training_interval_data(training_id)
 
         for interval in interval_list:

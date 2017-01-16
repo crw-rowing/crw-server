@@ -21,6 +21,7 @@ class DatabaseTest(u.TestCase):
         self.sdb = d.SessionDatabase(self.db)
         self.hdb = d.HealthDatabase(self.db)
         self.trdb = d.TrainingDatabase(self.db)
+        self.idb = d.IntervalDatabase(self.db)
         self.USERS = [('kees@kmail.com', 'hunter4'),
                       ('adfd@bdfds.nl', 'b'),
                       ('b+a@b.b.b.nl', 'b'),
@@ -505,6 +506,7 @@ class TrainingDatabaseTest(DatabaseTest):
             """Test that no entries are retreived if the user doesn't
             exist.""")
 
+
 class IntervalDatabaseTest(DatabaseTest):
     def test_add_new_interval(self):
         user_id = 1
@@ -517,18 +519,20 @@ class IntervalDatabaseTest(DatabaseTest):
         pace = 10
         rest = datetime.timedelta(hours=1)
         self.trdb.add_training(user_id, date, type_is_ed, comment)
-        self.trdb.add_interval(training_id, duration, power, pace, rest)
-        self.assertEquals(self.trdb.get_training_interval_data(training_id)[0],
+        self.idb.add_interval(training_id, duration, power, pace, rest)
+        self.assertEquals(self.idb.get_training_interval_data(training_id)[0],
                           (duration, power, pace, rest),
                           """Test that the correct data is saved when
                           adding a new entry.""")
 
-	def test_add_interval_data_no_training(self):
-		with self.assertRaises((d.TrainingDoesNotExistError) as e:
-			self.trdb.add_training(-1, datetime.date(1999,12,31),
-								   10,10,''),
-								   """Test that it gives an error when
-								   the training does not exists.""")
+    def test_add_interval_data_no_training(self):
+        """Test that it gives an error when
+        the training does not exists."""
+        with self.assertRaises(d.UserDoesNotExistError) as e:
+             self.trdb.add_training(
+                -1, datetime.date(1999, 12, 31),
+                10, 10)
+
 
 if __name__ == '__main__':
     suite1 = u.TestLoader()\
@@ -541,5 +545,7 @@ if __name__ == '__main__':
               .loadTestsFromTestCase(HealthDatabaseTest)
     suite5 = u.TestLoader()\
               .loadTestsFromTestCase(TrainingDatabaseTest)
-    suite = u.TestSuite([suite1, suite2, suite3, suite4, suite5])
+    suite6 = u.TestLoader()\
+              .loadTestsFromTestCase(TrainingDatabaseTest)
+    suite = u.TestSuite([suite1, suite2, suite3, suite4, suite5, suite6])
     u.TextTestRunner(verbosity=2).run(suite)
