@@ -596,8 +596,8 @@ class CrwJsonRpcTest(u.TestCase):
         self.assertEquals(len(data), 2,
                           """Test that two training entries are found from
                           three days in the past to now""")
-        self.assertEquals(data[0][0], self.time1)
-        self.assertEquals(data[1][0], self.time2)
+        self.assertEquals(data[1][0], self.time1)
+        self.assertEquals(data[0][0], self.time2)
         self.assertEquals(data[0][3][0][0], self.interval_list[0][0])
 
     def test_get_my_training_data_7_days(self):
@@ -610,9 +610,9 @@ class CrwJsonRpcTest(u.TestCase):
         self.assertEquals(len(data), 3,
                           """Test that three training entries are found from
                           seven days in the past to now""")
-        self.assertEquals(data[0][0], self.time1)
+        self.assertEquals(data[2][0], self.time1)
         self.assertEquals(data[1][0], self.time2)
-        self.assertEquals(data[2][0], self.time3)
+        self.assertEquals(data[0][0], self.time3)
         self.assertEquals(data[2][3][0][0], self.interval_list[0][0])
 
     def test_add_training_not_authenticated(self):

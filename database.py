@@ -496,7 +496,8 @@ class HealthDatabase:
             """SELECT date, resting_heart_rate, weight, comment
             FROM health_data
             WHERE user_id = %s
-            AND date >= %s;""",
+            AND date >= %s
+            ORDER BY date ASC;""",
             (user_id, datetime.date.today() - time))
 
         return self.d.cursor.fetchall()
@@ -548,7 +549,8 @@ class TrainingDatabase:
             """SELECT id, time, type_is_ed, comment
             FROM training_data
             WHERE user_id = %s
-            AND time >= %s;""",
+            AND time >= %s
+            ORDER BY time ASC;""",
             (user_id, datetime.datetime.now() - time))
 
         return self.d.cursor.fetchall()
