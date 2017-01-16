@@ -607,6 +607,7 @@ class IntervalDatabase:
         """
         trdb = TrainingDatabase(self.d)
         if not trdb.does_training_exist(training_id):
+            raise TrainingDoesNotExistError
 
         self.d.cursor.execute(
             """SELECT duration, power, pace, rest
