@@ -268,7 +268,7 @@ class CrwJsonRpc(JsonRpcServer):
             duration = interval[0]
             power = interval[1]
             pace = interval[2]
-            rest = datetime.timedelta(seconds=interval[3])
+            rest = interval[3]
             self.idb.add_interval(training_id, duration, power, pace, rest)
 
         return True

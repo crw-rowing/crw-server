@@ -545,10 +545,8 @@ class CrwJsonRpcTest(u.TestCase):
         time = datetime.datetime.now()
         type_is_ed = True
         comment = 'My training'
-        return_interval_list = [(200, 120, 10, datetime.timedelta(seconds=10)),
-                                (180, 180, 90, datetime.timedelta(seconds=30))]
-        interval_list = [(200, 120, 10, 10),
-                         (180, 180, 90, 30)]
+        interval_list = [(200, 120, 10, datetime.timedelta(seconds=10)),
+                         (180, 180, 90, datetime.timedelta(seconds=30))]
 
         self.set_user_and_authenticated(user_id)
         self.rpc.add_training(time, type_is_ed, comment, interval_list)
@@ -563,7 +561,7 @@ class CrwJsonRpcTest(u.TestCase):
         [interval_1, interval_2] = self.idb\
                                        .get_training_interval_data(training_id)
 
-        for interval in return_interval_list:
+        for interval in interval_list:
             self.assertTrue(interval == interval_1 or
                             interval == interval_2)
 
@@ -575,8 +573,8 @@ class CrwJsonRpcTest(u.TestCase):
         self.time3 = datetime.datetime.now() - datetime.timedelta(days=5)
         self.type_is_ed = True
         self.comment = 'My training'
-        self.interval_list = [(200, 120, 10, 10),
-                              (180, 180, 90, 30)]
+        self.interval_list = [(200, 120, 10, datetime.timedelta(minutes=10)),
+                              (180, 180, 90, datetime.timedelta(seconds=30))]
 
         self.set_user_and_authenticated(user_id)
         self.rpc.add_training(self.time1, self.type_is_ed, self.comment,
@@ -632,8 +630,8 @@ class CrwJsonRpcTest(u.TestCase):
         time = datetime.datetime.now()
         type_is_ed = True
         comment = 'My training'
-        interval_list = [(200, 120, 10, 10),
-                         (180, 180, 90, 30)]
+        interval_list = [(200, 120, 10, datetime.timedelta(minutes=10)),
+                         (180, 180, 90, datetime.timedelta(seconds=30))]
 
         self.set_user_and_authenticated(user_id)
 
@@ -674,8 +672,7 @@ class CrwJsonRpcTest(u.TestCase):
         time = datetime.datetime.now()
         type_is_ed = True
         comment = 'My training'
-        interval = (200, 120, 10, 10)
-        return_interval = (200, 120, 10, datetime.timedelta(seconds=10))
+        interval = (200, 120, 10, datetime.timedelta(seconds=10))
 
         self.set_user_and_authenticated(user_id)
         self.rpc.add_training(time, type_is_ed, comment, [interval])
@@ -688,7 +685,7 @@ class CrwJsonRpcTest(u.TestCase):
         self.assertEquals(team_training_data[0][1][0][1], type_is_ed)
         self.assertEquals(team_training_data[0][1][0][2], comment)
         self.assertEquals(team_training_data[0][1][0][3],
-                          [return_interval])
+                          [interval])
 
 
 if __name__ == '__main__':
