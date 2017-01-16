@@ -13,7 +13,7 @@ HOST = cfg.get('http', 'host')
 PORT = int(cfg.get('http', 'port'))
 
 USE_HTTPS = cfg.get('https', 'enabled') == 'True'
-HTTPS_PORT = cfg.get('https', 'port')
+HTTPS_PORT = int(cfg.get('https', 'port'))
 HTTPS_CERT = cfg.get('https', 'certfile')
 HTTPS_KEY = cfg.get('https', 'keyfile')
 
