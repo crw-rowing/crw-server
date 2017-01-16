@@ -47,6 +47,11 @@ class CrwJsonRpc(JsonRpcServer):
                 else:
                     self.authenticated = self.sdb.verify_session_key(
                         self.current_user_id, data['session'])
+                    self.current_session = data['session']
+                
+                if self.authenticated:
+                    self.sdb.renew_session_key(
+                        self.current_user_id, data['session'])
 
         response = JsonRpcServer.rpc_invoke_single(self, data)
 
@@ -82,6 +87,15 @@ class CrwJsonRpc(JsonRpcServer):
     def logged_in(self):
         """Returns if the user is still authenticated"""
         return self.authenticated
+        
+    def logout(self):
+        """Removes user's active session from the session database"""
+        if not self.authenticated:
+            raise error_incorrect_authentication
+        
+        self.sdb.remove_session_key(self.current_session)
+        
+        return True
 
     def create_team(self, team_name):
         """Creates a team with the user of user_id as an coach.
