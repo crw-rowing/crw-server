@@ -71,7 +71,7 @@ class CrwJsonRpc(JsonRpcServer):
 
     def login(self, email, password):
         """This function will verify the user and return a new session
-        key if the user has been authencitated correctly."""
+        key if the user has been authenticated correctly."""
         if (not self.udb.does_user_email_exist(email)) or\
            (not self.udb.verify_user(email, password)):
             raise error_invalid_account_credentials
@@ -80,8 +80,8 @@ class CrwJsonRpc(JsonRpcServer):
             self.udb.get_user_id(email))
 
     def logged_in(self):
-        """Returns if the user is still aunthencitated"""
-        return self.authencitated
+        """Returns if the user is still authenticated"""
+        return self.authenticated
 
     def create_team(self, team_name):
         """Creates a team with the user of user_id as an coach.
