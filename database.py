@@ -577,33 +577,33 @@ class TrainingDatabase:
         self.d.database_connection.commit()
 
 class IntervalDatabase:
-	def __init__(self, database):
-		self.d = database
-		
-	def add_interval(self, training_id, duration, power, pace, rest):
-    """Adds interval entry in interval database that belongs to
-    given training_id. With duration in seconds. If pace is 0
-    it will be stored as NULL"""
+    def __init__(self, database):
+        self.d = database
+    
+    def add_interval(self, training_id, duration, power, pace, rest):
+        """Adds interval entry in interval database that belongs to
+        given training_id. With duration in seconds. If pace is 0
+        it will be stored as NULL"""
 
-    trdb = TrainingDatabase(self.d)
-    if not trdb.does_training_exist(training_id):
-        raise TrainingDoesNotExistError(training_id)
+        trdb = TrainingDatabase(self.d)
+        if not trdb.does_training_exist(training_id):
+            raise TrainingDoesNotExistError(training_id)
 
-    if pace == 0:
-        pace = None
+        if pace == 0:
+            pace = None
 
-    self.d.cursor.execute(
-        """INSERT INTO interval_data
-        (training_id, duration, power, pace, rest)
-        VALUES (%s, %s, %s, %s, %s);""",
-        (training_id, duration, power, pace, rest))
+        self.d.cursor.execute(
+            """INSERT INTO interval_data
+            (training_id, duration, power, pace, rest)
+            VALUES (%s, %s, %s, %s, %s);""",
+            (training_id, duration, power, pace, rest))
 
-    self.d.database_connection.commit()
-	
+        self.d.database_connection.commit()
+    
     def get_training_interval_data(self, training_id):
-    """Returns a list of (duration, power, pace, rest) 
-    tuples for all entries of the training with `training_id`
-    """
+        """Returns a list of (duration, power, pace, rest) 
+        tuples for all entries of the training with `training_id`
+        """
         trdb = TrainingDatabase(self.d)
         if not trdb.does_training_exist(training_id):
             raise TrainingDoesNotExistError(training_id)
