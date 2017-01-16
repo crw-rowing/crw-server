@@ -107,9 +107,7 @@ class DateTimeEncoder(json.JSONEncoder):
         elif isinstance(obj, datetime.timedelta):
             return {
                 '__type__': 'timedelta',
-                'days': obj.days,
-                'seconds': obj.seconds,
-                'microseconds': obj.microseconds,
+                'seconds': obj.seconds
             }
         elif isinstance(obj, datetime.date):
             return {
@@ -138,7 +136,7 @@ class DateTimeDecoder(json.JSONDecoder):
         if type == 'datetime':
             return datetime.datetime(**dict)
         elif type == 'timedelta':
-            return datetime.timedelta(**dict)
+            return datetime.timedelta(seconds=dict['seconds'])
         elif type == 'date':
             return datetime.date(**dict)
         else:
