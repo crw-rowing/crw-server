@@ -493,6 +493,19 @@ class TrainingDatabaseTest(DatabaseTest):
                           """Test that the correct data is saved when
                           adding a new entry.""")
 
+    def test_get_past_training_data_no_data(self):
+        self.assertEquals(
+            len(self.trdb.get_past_training_data(4)), 0,
+            """Test that no entries are retreived if the user doesn't
+            have any.""")
+
+    def test_get_past_training_data_no_user(self):
+        self.assertEquals(
+            len(self.trdb.get_past_training_data(-1)), 0,
+            """Test that no entries are retreived if the user doesn't
+            exist.""")
+
+class IntervalDatabaseTest(DatabaseTest):
     def test_add_new_interval(self):
         user_id = 1
         date = datetime.datetime.now()
@@ -510,17 +523,12 @@ class TrainingDatabaseTest(DatabaseTest):
                           """Test that the correct data is saved when
                           adding a new entry.""")
 
-    def test_get_past_training_data_no_data(self):
-        self.assertEquals(
-            len(self.trdb.get_past_training_data(4)), 0,
-            """Test that no entries are retreived if the user doesn't
-            have any.""")
-
-    def test_get_past_training_data_no_user(self):
-        self.assertEquals(
-            len(self.trdb.get_past_training_data(-1)), 0,
-            """Test that no entries are retreived if the user doesn't
-            exist.""")
+	def test_add_interval_data_no_training(self):
+		with self.assertRaises((d.TrainingDoesNotExistError) as e:
+			self.trdb.add_training(-1, datetime.date(1999,12,31),
+								   10,10,''),
+								   """Test that it gives an error when
+								   the training does not exists.""")
 
 if __name__ == '__main__':
     suite1 = u.TestLoader()\

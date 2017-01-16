@@ -565,7 +565,7 @@ class CrwJsonRpcTest(u.TestCase):
                             interval == interval_2)
 
         self.assertFalse(interval_1 == interval_2)
-        
+
     def populate_test_user_training(self, user_id):
         self.time1 = datetime.datetime.now()
         self.time2 = datetime.datetime.now() - datetime.timedelta(days=2)
@@ -577,21 +577,21 @@ class CrwJsonRpcTest(u.TestCase):
 
         self.set_user_and_authenticated(user_id)
         self.rpc.add_training(self.time1, self.type_is_ed, self.comment,
-            self.interval_list)
+                              self.interval_list)
         self.set_user_and_authenticated(user_id)
         self.rpc.add_training(self.time2, self.type_is_ed, self.comment,
-            self.interval_list)
+                              self.interval_list)
         self.set_user_and_authenticated(user_id)
         self.rpc.add_training(self.time3, self.type_is_ed, self.comment,
-            self.interval_list)
-        
+                              self.interval_list)
+
     def test_get_my_training_data_3_days(self):
         user_id = 3
         self.populate_test_user_training(user_id)
 
         self.set_user_and_authenticated(user_id)
         data = self.rpc.get_my_training_data(3)
-        
+
         self.assertEquals(len(data), 2,
                           """Test that two training entries are found from
                           three days in the past to now""")
@@ -605,7 +605,7 @@ class CrwJsonRpcTest(u.TestCase):
 
         self.set_user_and_authenticated(user_id)
         data = self.rpc.get_my_training_data(7)
-        
+
         self.assertEquals(len(data), 3,
                           """Test that three training entries are found from
                           seven days in the past to now""")
@@ -613,7 +613,78 @@ class CrwJsonRpcTest(u.TestCase):
         self.assertEquals(data[1][0], self.time2)
         self.assertEquals(data[2][0], self.time3)
         self.assertEquals(data[2][3][0][0], self.interval_list[0][0])
-        
+
+    def test_add_training_not_authenticated(self):
+        self.set_user_and_authenticated(3, False)
+        with self.assertRaises(jsonrpc.RPCError) as err:
+            self.rpc.add_training(None, None, None, None)
+
+        self.assertEquals(err.exception.code, 3,
+                          """Test that the correct exception is raised
+                          when an incorrect key is provided to
+                          create_team RPC.""")
+
+    def test_add_training_coach(self):
+        user_id = self.test_team_coach_id
+        time = datetime.datetime.now()
+        type_is_ed = True
+        comment = 'My training'
+        interval_list = [(200, 120, 10, datetime.timedelta(minutes=10)),
+                         (180, 180, 90, datetime.timedelta(seconds=30))]
+
+        self.set_user_and_authenticated(user_id)
+
+        with self.assertRaises(jsonrpc.RPCError) as err:
+            self.rpc.add_training(time, type_is_ed, comment, interval_list)
+
+        self.assertEquals(err.exception.code, 8,
+                          """Test that the correct exception is raised
+                          when an user is a coach.""")
+
+    def test_get_team_training_data_no_rowers(self):
+        self.set_user_and_authenticated(self.test_team_coach_id)
+        team_training_data = self.rpc.get_team_training_data(7)
+
+        self.assertEquals(team_training_data, [],
+                          """Test that the team training data is an
+                          empty list when there are no rowers in the
+                          team""")
+
+    def test_get_team_training_data_no_trainings(self):
+        self.set_user_and_authenticated(self.test_team_coach_id)
+        self.rpc.add_to_team(self.USERS[3][0])
+
+        self.set_user_and_authenticated(self.test_team_coach_id)
+        team_training_data = self.rpc.get_team_training_data(7)
+
+        self.assertEquals(len(team_training_data), 1)
+        self.assertEquals(team_training_data[0][0], self.USERS[3][0])
+        self.assertEquals(team_training_data[0][1], [])
+
+    def test_get_team_training_data_training_and_interval(self):
+        user_id = 4
+        user_email = self.USERS[user_id - 1][0]
+
+        self.set_user_and_authenticated(self.test_team_coach_id)
+        self.rpc.add_to_team(user_email)
+
+        time = datetime.datetime.now()
+        type_is_ed = True
+        comment = 'My training'
+        interval = (200, 120, 10, datetime.timedelta(minutes=10))
+
+        self.set_user_and_authenticated(user_id)
+        self.rpc.add_training(time, type_is_ed, comment, [interval])
+
+        self.set_user_and_authenticated(self.test_team_coach_id)
+        team_training_data = self.rpc.get_team_training_data(7)
+
+        self.assertEquals(team_training_data[0][0], user_email)
+        self.assertEquals(team_training_data[0][1][0][0], time)
+        self.assertEquals(team_training_data[0][1][0][1], type_is_ed)
+        self.assertEquals(team_training_data[0][1][0][2], comment)
+        self.assertEquals(team_training_data[0][1][0][3], [interval])
+
 
 if __name__ == '__main__':
     suite = u.TestLoader()\
