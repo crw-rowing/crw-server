@@ -249,10 +249,9 @@ class CrwJsonRpc(JsonRpcServer):
     def add_training(self, time, type_is_ed, comment, interval_list):
         """Adds a new training for the user with associated interval(s)
         supplied in the interval_list. interval_list must be in the form
-        [(duration, power, pace, rest)] with rest as datetime.timedelta object.
+        [(duration, power, pace, rest)] with rest as seconds.
 
         Returns true on success"""
-
         if not self.authenticated:
             raise error_incorrect_authentication
 
@@ -269,7 +268,7 @@ class CrwJsonRpc(JsonRpcServer):
             duration = interval[0]
             power = interval[1]
             pace = interval[2]
-            rest = interval[3]
+            rest = datetime.timedelta(seconds=interval[3])
             self.idb.add_interval(training_id, duration, power, pace, rest)
 
         return True
