@@ -14,7 +14,7 @@ main_users = [
 
 secundary_users = []
 for i in range(1, 20):
-    secondary_users = str(i) + '@mail.com'
+    secundary_users.append(str(i) + '@mail.com')
 
 all_users = main_users + secundary_users
 
