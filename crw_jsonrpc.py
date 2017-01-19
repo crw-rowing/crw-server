@@ -84,9 +84,21 @@ class CrwJsonRpc(JsonRpcServer):
         return self.sdb.generate_session_key(
             self.udb.get_user_id(email))
 
-    def logged_in(self):
-        """Returns if the user is still authenticated"""
-        return self.authenticated
+    def user_status(self):
+        """Returns if the user is still authenticated, if the user is
+        in a team and if the user is a coach in the form:
+
+        (authenticated, is_in_team, is_coach)"""
+        if not self.authenticated or\
+           not self.udb.does_user_exist(self.current_user_id):
+            return (False, False, False)
+        else:
+            user_status = self.udb.get_user_team_status(
+                self.current_user_id)
+
+            return (self.authenticated,
+                    user_status[0] is not None,
+                    user_status[1] is not None and user_status[1])
 
     def logout(self):
         """Removes user's active session from the session database"""

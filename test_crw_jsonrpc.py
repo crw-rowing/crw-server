@@ -687,6 +687,24 @@ class CrwJsonRpcTest(u.TestCase):
         self.assertEquals(team_training_data[0][1][0][3],
                           [interval])
 
+    def test_user_status_not_authenticated(self):
+        self.set_user_and_authenticated(1, False)
+        self.assertEquals(self.rpc.user_status(), (False, False, False))
+
+    def test_user_status_authenticated(self):
+        self.set_user_and_authenticated(1)
+        self.assertEquals(self.rpc.user_status(), (True, False, False))
+
+    def test_user_status_authenticated_coach(self):
+        self.set_user_and_authenticated(self.test_team_coach_id)
+        self.rpc.add_to_team(self.USERS[0][0])
+        self.set_user_and_authenticated(1)
+        self.assertEquals(self.rpc.user_status(), (True, True, False))
+
+    def test_user_status_authenticated_coach(self):
+        self.set_user_and_authenticated(self.test_team_coach_id)
+        self.assertEquals(self.rpc.user_status(), (True, True, True))
+
 
 if __name__ == '__main__':
     suite = u.TestLoader()\
