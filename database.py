@@ -431,13 +431,13 @@ class SessionDatabase:
             return None
 
         return saved_id_tuple[0]
-        
+
     def remove_session_key(self, session_key):
         """Removes the provided session key from the session key"""
         self.d.cursor.execute(
             """DELETE FROM sessions
             WHERE key = %s;""", (session_key,))
-        
+
         self.d.database_connection.commit()
 
 

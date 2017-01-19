@@ -13,7 +13,7 @@ import ssl
 def serve():
     global httpd, database_object, rpc
     port = crw.HTTPS_PORT if crw.USE_HTTPS else crw.PORT
-    httpd = HTTPServer((crw.HOST, port),FileServer)
+    httpd = HTTPServer((crw.HOST, port), FileServer)
     if crw.USE_HTTPS:
         httpd.socket = ssl.wrap_socket(
             httpd.socket,
