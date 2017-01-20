@@ -379,25 +379,25 @@ class CrwJsonRpc(JsonRpcServer):
 
 
 error_account_already_exists = jsonrpc.RPCError(
-    1, """There is already an account associated
-    with this email""")
+    1, """There is already an account associated"""
+    """with this email""")
 error_invalid_account_credentials = jsonrpc.RPCError(
     2, """The provided credentials are incorrect""")
 error_incorrect_authentication = jsonrpc.RPCError(
-    3, """The server was not able to authenticate the user, the
-    session or the user_id is missing or incorrect or expired.""")
+    3, """The server was not able to authenticate the user, the"""
+    """session or the user_id is missing or incorrect or expired.""")
 error_no_password_submitted = jsonrpc.RPCError(
     4, """No password is entered""")
 error_invalid_action_no_coach = jsonrpc.RPCError(
-    5, """The user is not a coach in a team, so they can't perform
-    this action""")
+    5, """The user is not a coach in a team, so they can't perform"""
+    """this action""")
 error_user_is_not_in_a_team = jsonrpc.RPCError(
     6, """The user is not in a team""")
 error_user_does_not_exist = jsonrpc.RPCError(
     7, """"No user with that value exists""")
 error_invalid_action_coach = jsonrpc.RPCError(
-    8, """The user is a coach in a team, so they can't perform
-    this action""")
+    8, """The user is a coach in a team, so they can't perform"""
+    """this action""")
 error_invalid_action_last_coach = jsonrpc.RPCError(
     9, """Removing the last coach is a team is not allowed""")
 error_invalid_email_address = jsonrpc.RPCError(
