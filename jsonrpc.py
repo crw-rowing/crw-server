@@ -71,7 +71,7 @@ class JsonRpcServer:
                               object_hook=DateTimeDecoder.dict_to_object)
             if type(data) == list:  # Batch response
                 response = filter(lambda x: x is not None,
-                                  map(rpc_invoke_single, data))
+                                  map(self.rpc_invoke_single, data))
             else:
                 response = self.rpc_invoke_single(data)
         except ValueError:
