@@ -78,6 +78,8 @@ class JsonRpcServer:
             response['error'] = RPCError.parse.serialize()
         except RPCError as e:
             response['error'] = e.serialize()
+        except Exception as e:
+            response['error'] = RPCError.internal_error(3).serialize()
         finally:
             return None if response is None else json.dumps(
                 response, cls=DateTimeEncoder)
