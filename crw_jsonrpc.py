@@ -109,6 +109,13 @@ class CrwJsonRpc(JsonRpcServer):
 
         return True
 
+    def logged_in(self):
+        """Returns the user's authenticating status and coach status"""
+        (team_id, coach) = self.udb.get_user_team_status(
+            self.current_user_id)
+
+        return (self.authenticated, coach)
+        
     def create_team(self, team_name):
         """Creates a team with the user of user_id as an coach.
         Returns the team_id of the created team."""
