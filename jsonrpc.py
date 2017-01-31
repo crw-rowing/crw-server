@@ -173,10 +173,13 @@ class RPCError(Exception):
 
         return d
 
+    @staticmethod
+    def internal_error(e):
+        return RPCError(-32603, 'Internal JSON-RPC error', data=e)
+
 
 RPCError.parse = RPCError(-32700, 'Invalid JSON')
 RPCError.invalid_request = RPCError(-32600, 'Invalid request')
 RPCError.method_not_found = RPCError(-32601, 'Method not found')
 RPCError.invalid_params = RPCError(-32602, 'Invalid method parameters')
-RPCError.internal_error = lambda e: \
-    RPCError(-32603, 'Internal JSON-RPC error', data=e)
+    
