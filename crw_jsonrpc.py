@@ -71,6 +71,8 @@ class CrwJsonRpc(JsonRpcServer):
         return s
 
     def create_account(self, email, password):
+        self.check_arguments_not_none([email, password])
+
         try:
             self.udb.add_user(email, password)
             return True
@@ -84,6 +86,8 @@ class CrwJsonRpc(JsonRpcServer):
     def login(self, email, password):
         """This function will verify the user and return a new session
         key if the user has been authenticated correctly."""
+        self.check_arguments_not_none([email, password])
+
         if (not self.udb.does_user_email_exist(email)) or\
            (not self.udb.verify_user(email, password)):
             raise error_invalid_account_credentials
@@ -122,10 +126,12 @@ class CrwJsonRpc(JsonRpcServer):
             self.current_user_id)
 
         return (self.authenticated, coach)
-        
+
     def create_team(self, team_name):
         """Creates a team with the user of user_id as an coach.
         Returns the team_id of the created team."""
+        self.check_arguments_not_none([team_name])
+
         if not self.authenticated:
             raise error_incorrect_authentication
 
@@ -134,6 +140,8 @@ class CrwJsonRpc(JsonRpcServer):
     def add_to_team(self, user_to_add_email):
         """Adds the user with user_to_add_email to the team that the user
         is in."""
+        self.check_arguments_not_none([user_to_add_email])
+
         if not self.authenticated:
             raise error_incorrect_authentication
 
@@ -154,6 +162,8 @@ class CrwJsonRpc(JsonRpcServer):
     def remove_from_team(self, user_to_remove_email):
         """Removes the user with user_to_remove_email from the team that the user
         is in."""
+        self.check_arguments_not_none([user_to_remove_email])
+
         if not self.authenticated:
             raise error_incorrect_authentication
 
@@ -177,6 +187,8 @@ class CrwJsonRpc(JsonRpcServer):
         herself.
 
         """
+        self.check_arguments_not_none([user_to_change_email, coach])
+
         if not self.authenticated:
             raise error_incorrect_authentication
 
@@ -225,6 +237,9 @@ class CrwJsonRpc(JsonRpcServer):
         database using HealthDatabase::add_health_data.
 
         Returns true on success"""
+        self.check_arguments_not_none([date, resting_heart_rate,
+                                       weight])
+
         if not self.authenticated:
             raise error_incorrect_authentication
 
@@ -247,6 +262,8 @@ class CrwJsonRpc(JsonRpcServer):
 
         `days_in_the_past` should be an int.
         """
+        self.check_arguments_not_none([days_in_the_past])
+
         if not self.authenticated:
             raise error_incorrect_authentication
 
@@ -260,6 +277,8 @@ class CrwJsonRpc(JsonRpcServer):
         The user should be authenticated and a coach.
 
         `days_in_the_past` should be an int."""
+        self.check_arguments_not_none([days_in_the_past])
+
         if not self.authenticated:
             raise error_incorrect_authentication
 
@@ -292,6 +311,8 @@ class CrwJsonRpc(JsonRpcServer):
         [(duration, power, pace, rest)] with rest as seconds.
 
         Returns true on success"""
+        self.check_arguments_not_none([time, type_is_ed, interval_list])
+
         if not self.authenticated:
             raise error_incorrect_authentication
 
@@ -309,6 +330,10 @@ class CrwJsonRpc(JsonRpcServer):
             power = interval[1]
             pace = interval[2]
             rest = interval[3]
+
+            # Pace is explicitly allowed to be None
+            self.check_arguments_not_none([duration, power, rest])
+
             self.idb.add_interval(training_id, duration, power, pace, rest)
 
         return True
@@ -317,6 +342,7 @@ class CrwJsonRpc(JsonRpcServer):
         """Returns training data with interval data from days_in_the_past
         to now, in the form
         [(time, type_is_ed, comment, [(duration, power, pace, rest)])] """
+        self.check_arguments_not_none([days_in_the_past])
 
         if not self.authenticated:
             raise error_incorrect_authentication
@@ -352,6 +378,7 @@ class CrwJsonRpc(JsonRpcServer):
 
         `days_in_the_past` should be an int.
         """
+        self.check_arguments_not_none([days_in_the_past])
 
         if not self.authenticated:
             raise error_incorrect_authentication
@@ -391,6 +418,13 @@ class CrwJsonRpc(JsonRpcServer):
 
         return team_training_data
 
+    def check_arguments_not_none(self, list_of_arguments):
+        """Accepts a list of arguments that can't be None. Raises an
+        error_mandatory_argument_none when any of these is None."""
+        for argument in list_of_arguments:
+            if argument is None:
+                raise error_mandatory_argument_none
+
 
 error_account_already_exists = jsonrpc.RPCError(
     1, """There is already an account associated"""
@@ -416,3 +450,5 @@ error_invalid_action_last_coach = jsonrpc.RPCError(
     9, """Removing the last coach is a team is not allowed""")
 error_invalid_email_address = jsonrpc.RPCError(
     10, """The given email address is synthactically invalid.""")
+error_mandatory_argument_none = jsonrpc.RPCError(
+    11, """One of the mandatory arguments was None.""")

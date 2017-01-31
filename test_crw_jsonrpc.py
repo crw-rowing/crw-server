@@ -618,7 +618,7 @@ class CrwJsonRpcTest(u.TestCase):
     def test_add_training_not_authenticated(self):
         self.set_user_and_authenticated(3, False)
         with self.assertRaises(jsonrpc.RPCError) as err:
-            self.rpc.add_training(None, None, None, None)
+            self.rpc.add_training(0, 0, 0, 0)
 
         self.assertEquals(err.exception.code, 3,
                           """Test that the correct exception is raised

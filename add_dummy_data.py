@@ -32,7 +32,7 @@ def create_fake_data(user, user_id, rpc):
 
         rpc.authenticated = True
         rpc.current_user_id = user_id
-        rpc.add_health_data(date, 
+        rpc.add_health_data(date,
                             hr_base + int(r.random() * hr_dev),
                             weight_base + int(r.random() * weight_dev),
                             '')
@@ -43,7 +43,8 @@ def create_fake_data(user, user_id, rpc):
         rpc.add_training(dt.datetime.combine(date, time),
                          r.randint(0, 1) == 0,
                          '',
-                         [(r.randint(100, 500), power_base + int(r.random() * power_dev),
+                         [(r.randint(100, 500), power_base +
+                           int(r.random() * power_dev),
                            r.randint(20, 40),
                            dt.timedelta(seconds=r.randint(30, 300)))])
 
